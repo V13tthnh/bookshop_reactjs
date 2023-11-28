@@ -29,7 +29,7 @@ import HomePage from './pages/HomePage.js';
 import Page404 from "./pages/Page404.js";
 import DetailPage from "./pages/DetailPage.js";
 import ContactPage from "./pages/ContactPage.js";
-
+import Login from "./components/user/login.js";
 export default function App() {
   return (
     <>
@@ -38,6 +38,7 @@ export default function App() {
         <Route path="/detail/:id" element={<DetailPage />}></Route>
         <Route path="/contact-us" element={<ContactPage />}></Route>
         <Route path="/404" element={<Page404 />}></Route>
+        <Route path="/login" element={<Login />}></Route>
       </Routes>
     </>
   );

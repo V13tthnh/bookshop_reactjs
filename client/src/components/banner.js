@@ -32,9 +32,10 @@ export default function Banner() {
 			</div>
 		</div> */}
 		<div className="text">
-  Bootstrap v3.4.1 Carousel<br/>
+      
+  Bootstrap v3.4.1 Carousel  <br/>
 </div>
-<div className="container-fluid">
+<div className="container-fluid mb-2">
   <div id="carousel-example-generic" className="carousel slide" data-ride="carousel">
     
     <ol className="carousel-indicators">
@@ -46,11 +47,11 @@ export default function Banner() {
   
     <div className="carousel-inner" role="listbox">
       <div className="item active">
-        <img src="./images/banner/slider.png"/>
+        <img src="./images/banner/slide1.jpg"/>
       </div>
 
       <div className="item">
-        <img src="./images/banner/slider2.jpg"/>
+        <img src="./images/banner/slide2.jpg"/>
         <div className="carousel-caption">
           <h4>Bootstrap caption example</h4>
           <p>Bootstrap 3.4.1 is not so old, but you can use Bootstrap 4 already.</p>
@@ -58,7 +59,7 @@ export default function Banner() {
       </div>
 
       <div className="item">
-        <img src="./images/banner/slider3.jpg"/>
+        <img src="./images/banner/slide3.jpg"/>
       </div>
     </div>
 

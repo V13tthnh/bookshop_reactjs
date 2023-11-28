@@ -1,5 +1,26 @@
+import { NavLink } from "react-router-dom";
+
 export default function TopBarHeader() {
     return (<>
+                    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       sdknbdkajbakdjn
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
         <div className="tg-topbar">
             <div className="container">
                 <div className="row">
@@ -45,7 +66,11 @@ export default function TopBarHeader() {
                             </ul>
                         </div>
                         <div className="tg-userlogin">
-                            <a href="">Đăng nhập</a>/<a href="">Đăng ký</a>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+                       Đăng Nhập
+                    </button>
+                     /<a href="">Đăng ký</a>
+     
                             {/* <figure><a href=""><img src="images/users/img-01.jpg" alt="image description" /></a></figure>
                         <span>Hi, John</span> */}
                         </div>
@@ -53,5 +78,6 @@ export default function TopBarHeader() {
                 </div>
             </div>
         </div>
+        
     </>);
 }

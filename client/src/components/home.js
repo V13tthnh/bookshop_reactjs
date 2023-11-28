@@ -18,6 +18,7 @@ export default function Home(props) {
     }, []);
 
     return (<>
+     
         <Banner />
         <main id="tg-main" className="tg-main tg-haslayout">
             <div className="tg-sectionspace tg-haslayout">
