@@ -65,5 +65,32 @@
   }
   
   img {
-    width: 100%;
+    width: 80%;
   }
+  
+  /*wishlist*/
+button.onAppWishList_remove {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  font-size: 16px;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  background: #d51c24;
+  color: #fff;
+  border-radius: 5px;
+}
+.delAll{
+  margin-top: 20px;
+  margin-bottom: 10px;
+  margin-right: 40px;
+}
+.text-right{
+  text-align: right;
+}
+.price{
+  display: flex;
+  margin-left: 10px;
+}

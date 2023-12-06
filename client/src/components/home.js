@@ -5,6 +5,7 @@ import SidebarCategories from "./categories/sidebar-categories";
 import axios from "axios";
 import { useEffect, useState } from 'react';
 import Banner from "./banner";
+import BookSort from "./book/book-sort";
 
 export default function Home(props) {
     const [listCategories, setListCategories] = useState([]);
@@ -28,10 +29,13 @@ export default function Home(props) {
                             <div className="col-xs-12 col-sm-8 col-md-8 col-lg-9 pull-right">
                                 <div id="tg-content" className="tg-content">
                                     <div className="tg-products">
-                                        <div className="tg-sectionhead">
+                                        {/* <div className="tg-sectionhead">
                                             <h2><span>People’s Choice</span>Bestselling Books</h2>
-                                        </div>
-                                        <SmallBanner />
+                                        </div> */}
+                                        {/* <SmallBanner /> */}
+                                        {/* <div className="tg-productgrid">
+                                            <BookSort />    
+                                        </div> */}
                                         <BooksList data={props.data} />
                                     </div>
                                 </div>

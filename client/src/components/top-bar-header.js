@@ -11,42 +11,17 @@ export default function TopBarHeader() {
                             <li>
                                 <a href="javascript:void(0);">
                                     <i className="icon-envelope"></i>
-                                    <em>Contact</em>
+                                    <em>Liên hệ</em>
                                 </a>
                             </li>
                             <li>
                                 <a href="javascript:void(0);">
                                     <i className="icon-question-circle"></i>
-                                    <em>Help</em>
+                                    <em>Cứu</em>
                                 </a>
                             </li>
                         </ul>
-                        <div className="dropdown tg-themedropdown tg-currencydropdown">
-                            <a href="javascript:void(0);" id="tg-currenty" className="tg-btnthemedropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i className="icon-earth"></i>
-                                <span>Currency</span>
-                            </a>
-                            <ul className="dropdown-menu tg-themedropdownmenu" aria-labelledby="tg-currenty">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i>£</i>
-                                        <span>British Pound</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i>$</i>
-                                        <span>Us Dollar</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i>€</i>
-                                        <span>Euro</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                        
                         <div className="tg-userlogin">
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#login">
                             Đăng Nhập

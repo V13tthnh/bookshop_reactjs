@@ -2,12 +2,12 @@ import { NavLink } from "react-router-dom";
 
 export default function NavigationHeader(props) {
     //console.log(props.data);
-    const categories = props.data.map(item => {
-        return (<>
-            <li role="presentation">
-                <a href="#fantasyhorror" aria-controls="fantasyhorror" role="tab" data-toggle="tab">{item.ten}</a>
-            </li></>)
-    })
+    // const categories = props.data.map(item => {
+    //     return (<>
+    //         <li role="presentation">
+    //             <a href="#fantasyhorror" aria-controls="fantasyhorror" role="tab" data-toggle="tab">{item.ten}</a>
+    //         </li></>)
+    // })
     return (<><div className="tg-navigationarea">
         <div className="container">
             <div className="row">
@@ -58,7 +58,7 @@ export default function NavigationHeader(props) {
                                             <li role="presentation">
                                                 <a href="#sciencefiction" aria-controls="sciencefiction" role="tab" data-toggle="tab">Science Fiction</a>
                                             </li> */}
-                                            {categories}
+                                            {/* {categories} */}
                                         </ul>
                                         <div className="tab-content tg-themetabcontent">
                                             <div role="tabpanel" className="tab-pane active" id="artandphotography">

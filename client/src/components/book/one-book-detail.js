@@ -1,4 +1,16 @@
-export default function OneBookDetail() {
+export default function OneBookDetail(product) {
+	const add = () => {
+        var book={id:product.data.id,name:product.data.name};
+		var cartItems=localStorage.getItem('wishlist');
+		if(cartItems==null){ 
+			cartItems=[book];
+		}else{
+			cartItems=JSON.parse(cartItems);
+			cartItems.push(book);
+		}
+		localStorage.setItem('wishlist',JSON.stringify(cartItems));
+		alert('Them sach vao wishlist thanh cong');
+    }
     return (<>
     <main id="tg-main" className="tg-main tg-haslayout">
 			<div className="tg-sectionspace tg-haslayout">
@@ -20,7 +32,7 @@ export default function OneBookDetail() {
 														<div className="tg-featureditmcontent">
 															<div className="tg-themetagbox"><span className="tg-themetag">featured</span></div>
 															<div className="tg-booktitle">
-																<h3><a href="javascript:void(0);">Things To Know About Green Flat Design</a></h3>
+																<h3><a href="javascript:void(0);">{product.data.name}</a></h3>
 															</div>
 															<span className="tg-bookwriter">By: <a href="javascript:void(0);">Farrah Whisenhunt</a></span>
 															<span className="tg-stars"><span></span></span>
@@ -62,7 +74,7 @@ export default function OneBookDetail() {
 														</div>
 														<a className="tg-btn tg-active tg-btn-lg" href="javascript:void(0);">Add To Basket</a>
 														<a className="tg-btnaddtowishlist" href="javascript:void(0);">
-															<span>add to wishlist</span>
+															<span onClick={add}>add to wishlist</span>
 														</a>
 													</div>
 												</div>
