@@ -1,4 +1,7 @@
+import { NavLink } from "react-router-dom";
+
 export default function MiddleContainerHeader(){
+	
     return (<>
     <div className="tg-middlecontainer">
 				<div className="container">
@@ -7,11 +10,12 @@ export default function MiddleContainerHeader(){
 							<strong className="tg-logo"><a href="index-2.html"><img src="images/logo.png" alt="company name here"/></a></strong>
 							<div className="tg-wishlistandcart">
 								<div className="dropdown tg-themedropdown tg-wishlistdropdown">
+									<NavLink to="/wishlist">
 									<a href="javascript:void(0);" id="tg-wishlisst" className="tg-btnthemedropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 										<span className="tg-themebadge">3</span>
 										<i className="icon-heart"></i>
 										<span>Wishlist</span>
-									</a>
+									</a></NavLink>
 									<div className="dropdown-menu tg-themedropdownmenu" aria-labelledby="tg-wishlisst">
 										<div className="tg-description"><p>No products were added to the wishlist!</p></div>
 									</div>
@@ -75,7 +79,7 @@ export default function MiddleContainerHeader(){
 										<input type="text" name="search" className="typeahead form-control" placeholder="Search by title, author, keyword, ISBN..."/>
 										<button type="submit"><i className="icon-magnifier"></i></button>
 									</fieldset>
-									<a href="javascript:void(0);">+  Advanced Search</a>
+									
 								</form>
 							</div>
 						</div>

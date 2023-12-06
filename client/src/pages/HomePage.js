@@ -6,32 +6,48 @@ import LoginForm from "../components/login-form";
 
 import { useEffect, useState} from 'react';
 import RegisterForm from "../components/register-form";
+import ForgotPasswordForm from "../components/forgot-password-form";
 
 export default function HomePage(){
     const [productList, setProductList] = useState([]);
-    const [Categories, setCategories] = useState([]);
-
+    //const [Categories, setCategories] = useState([]);
     useEffect(()=>{
-        axios('http://127.0.0.1:8000/api/san-pham')
+        axios('http://127.0.0.1:8000/api/book')
         .then(response =>  response.data)
         .then(json => setProductList(json.data))
         .catch((error)=>{
             console.log(error)
         })
 
-        axios('http://127.0.0.1:8000/api/loai-san-pham')
+        // axios('http://127.0.0.1:8000/api/loai-san-pham')
+        // .then(response =>  response.data)
+        // .then(json => setCategories(json.data))
+        // .catch((error)=>{
+        //     console.log(error)
+        // })
+
+    }, []);
+        useEffect(()=>{
+        axios('http://127.0.0.1:8000/api/book')
         .then(response =>  response.data)
-        .then(json => setCategories(json.data))
+        .then(json => setProductList(json.data))
         .catch((error)=>{
             console.log(error)
         })
+
+        // axios('http://127.0.0.1:8000/api/loai-san-pham')
+        // .then(response =>  response.data)
+        // .then(json => setCategories(json.data))
+        // .catch((error)=>{
+        //     console.log(error)
+        // })
 
     }, []);
 
    //console.log(productList);
    
     return(<>
-        <Header data={Categories}/>
+        <Header />
         <Home data={productList}/>
         {/* <div class="modal fade" id="login">
     <div class="modal-dialog">
@@ -65,6 +81,7 @@ export default function HomePage(){
 </div> */}
         <LoginForm/>
         <RegisterForm/>
+        <ForgotPasswordForm/>
         <Footer />
     </>)
 }
