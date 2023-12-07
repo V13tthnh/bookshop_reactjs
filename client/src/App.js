@@ -30,18 +30,22 @@ import Page404 from "./pages/Page404.js";
 import DetailPage from "./pages/DetailPage.js";
 import ContactPage from "./pages/ContactPage.js";
 import WishListPage from './pages/WishListPage.js';
-import Login from "./components/user/login.js";
+import CartPage from './pages/CartPage.js';
+import store from './store.js';
+import { Provider } from 'react-redux';
 export default function App() {
   return (
     <>
+      <Provider store={store}>
       <Routes>
         <Route path="/" element={<HomePage />}></Route>
         <Route path="/detail/:id" element={<DetailPage />}></Route>
         <Route path="/contact-us" element={<ContactPage />}></Route>
         <Route path="/404" element={<Page404 />}></Route>
-        <Route path="/login" element={<Login />}></Route>
+        <Route path="/cart" element={<CartPage />}></Route>
         <Route path='/wishlist' element={<WishListPage/>}></Route>
       </Routes>
+   </Provider>
     </>
   );
 };
