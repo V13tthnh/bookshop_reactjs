@@ -1,3 +1,3 @@
 export default function OneBookAuthor(props) {
-    return (<><span className="tg-bookwriter">By: <a href="javascript:void(0);">Angela Gunning</a></span></>)
+    return (<><span className="tg-bookwriter">Bởi tác giả: <a href="javascript:void(0);">{props.data}</a></span></>)
 }

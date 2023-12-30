@@ -1,44 +1,129 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import axios from "axios";
 import { NavLink } from "react-router-dom";
+import OneBookPrice from "../book/one-book-price";
+import ReactPaginate from 'react-paginate';
+
 export default function SidebarCategories(props) {
+	// Lấy tất cả các ô checkbox và thêm sự kiện change để thực hiện hàm tick
 	let boxes = document.querySelectorAll("input[type=checkbox]");
 	boxes.forEach(b => b.addEventListener("change", tick));
-	function tick(e) {
-		let state = e.target.checked; // save state of changed checkbox
-		boxes.forEach(b => b.checked = false); // clear all checkboxes
-		e.target.checked = state; // restore state of changed checkbox
-	}
-	const [listCategories, setListCategories] = useState([]);
-	const [selectedCategory, setSelectedCategory] = useState(null);
-	const [filteredBooks, setFilteredBooks] = useState([]);
-	const [minPrice, setMinPrice] = useState(0);
-	const [maxPrice, setMaxPrice] = useState(Number.MAX_SAFE_INTEGER);
 
+	// Hàm thực hiện việc giữ cho chỉ một checkbox được chọn tại một thời điểm
+	function tick(e) {
+		let state = e.target.checked; // Lưu trạng thái của ô checkbox đã thay đổi
+		boxes.forEach(b => b.checked = false); // Xóa chọn tất cả các ô checkbox
+		e.target.checked = state; // Khôi phục trạng thái của ô checkbox đã thay đổi
+	}
+	  // State và effect hooks để quản lý danh sách thể loại sách và các thông tin liên quan
+	const [listCategories, setListCategories] = useState([]); // Danh sách thể loại sách
+	const [selectedCategory, setSelectedCategory] = useState(null); // Thể loại đang được chọn
+	const [filteredBooks, setFilteredBooks] = useState([]); // Danh sách sách sau khi lọc
+	const [minPrice, setMinPrice] = useState(0); // Giá sách tối thiểu
+	const [maxPrice, setMaxPrice] = useState(Number.MAX_SAFE_INTEGER); // Giá sách tối đa
+	const [totalPages, setTotalPages] = useState(0);
+	const [newPage, setNewPage] = useState(0);
+  	const [selectedPriceRange, setSelectedPriceRange] = useState({ min: 0, max: Number.MAX_SAFE_INTEGER });
+
+	// Khai báo state và hàm để lựa chọn thứ tự sắp xếp sách
+	const [sortOrder, setSortOrder] = useState("asc");
+	const handleSortChange = (value) => {
+		setSortOrder(value);
+		let sortedBooks = [...filteredBooks];
+		// Sắp xếp sách dựa trên thứ tự đã chọn
+		if (value === "asc") {
+			sortedBooks.sort((a, b) => a.name.localeCompare(b.name));
+		} else if (value === "desc") {
+			sortedBooks.sort((a, b) => b.name.localeCompare(a.name));
+		} else if (value === "priceAsc") {
+			sortedBooks.sort((a, b) => a.unit_price - b.unit_price);
+		} else if (value === "priceDesc") {
+			sortedBooks.sort((a, b) => b.unit_price - a.unit_price);
+		}
+		setFilteredBooks(sortedBooks);
+	};
+  // useEffect hook để thêm sự kiện change cho tất cả các ô checkbox khi component được render
 	useEffect(() => {
-		
+		let boxes = document.querySelectorAll("input[type=checkbox]");
+		boxes.forEach(b => b.addEventListener("change", tick));
+		return () => {
+			boxes.forEach(b => b.removeEventListener("change", tick));
+		};
+	}, []);
+
+  // useEffect hook để fetch danh sách thể loại từ API khi component được render
+	useEffect(() => {
 		axios.get('http://127.0.0.1:8000/api/category')
 			.then(response => response.data)
 			.then(json => setListCategories(json.data))
 			.catch(error => console.log(error));
 	}, []);
 
-	const handleCategoryClick = (categoryId) => {
-		axios.get(`http://127.0.0.1:8000/api/filter-books/${categoryId}`)
-			.then(response => setFilteredBooks(response.data.filtered_books))
-			.catch(error => console.log(error));
+	const handleBookClick = async () => {
+		setNewPage(1); // Set lại trang là 1
+		setSelectedCategory(null); // Đặt lại thể loại là rỗng
+		setMinPrice(0); // Set giá nhỏ nhất là 0
+		setMaxPrice(Number.MAX_SAFE_INTEGER); // Set giá lớn nhất
+		setSelectedPriceRange({ min: 0, max: Number.MAX_SAFE_INTEGER });
+		try {
+		  const response = await axios.get(`http://127.0.0.1:8000/api/books?page=${newPage}`);
+		  if (response?.data) {
+			setFilteredBooks(response.data.data || []);
+			setTotalPages(response.data.total_pages || 0);
+		  }
+		} catch (error) {
+		  console.error("Error fetching data:", error);
+		}
+	  };
+	
+	  // Hàm xử lý khi người dùng click vào một thể loại sách cụ thể
+	const handleCategoryClick = async (categoryId) => {
+		setNewPage(1);
 		setSelectedCategory(categoryId);
-	};
+		setSelectedPriceRange({ min: 0, max: Number.MAX_SAFE_INTEGER });
+	  };
 
-	const handlePriceRangeChange = (min, max) => {
+	// Hàm xử lý khi người dùng thay đổi khoảng giá sách
+	const handlePriceRangeChange = async (min, max) => {
 		setMinPrice(min);
 		setMaxPrice(max);
+		setNewPage(1);
+		setSelectedCategory(null); 
+		setSelectedPriceRange({ min, max });
+	  };
 
-		axios.get(`http://127.0.0.1:8000/api/filter-books-by-price/${min}/${max}`)
-			.then(response => setFilteredBooks(response.data.filtered_books))
-			.catch(error => console.log(error));
+	  // Hàm xử lý khi người dùng click vào một trang cụ thể
+	const handlePageClick = ({ selected }) => {
+		const nextPage = selected + 1;
+		setNewPage(nextPage); 
 	};
 
+	// useEffect hook để fetch dữ liệu sách dựa trên các thay đổi trong trạng thái
+	useEffect(() => {
+		const fetchData = async () => {
+		  try {
+			let url = `http://127.0.0.1:8000/api/books?page=${newPage}`; 
+	
+			if (selectedCategory) {
+			  url = `http://127.0.0.1:8000/api/filter-books/${selectedCategory}?page=${newPage}`;
+			} else if (selectedPriceRange.min !== 0 || selectedPriceRange.max !== Number.MAX_SAFE_INTEGER) {
+			  url = `http://127.0.0.1:8000/api/filter-books-by-price/${selectedPriceRange.min}/${selectedPriceRange.max}?page=${newPage}`;
+			}
+	
+			const response = await axios.get(url);
+			if (response?.data) {
+			  setFilteredBooks(response.data.data || []);
+			  setTotalPages(response.data.total_pages || 0);
+			}
+		  } catch (error) {
+			console.error("Error fetching data:", error);
+		  }
+		};
+	
+		fetchData();
+	  }, [selectedCategory, selectedPriceRange, newPage]);
+	
+	// Tạo các phần tử thể loại sách từ danh sách thể loại
 	const categoryItems = listCategories.map(item => (
 		<li key={item.id} onClick={() => handleCategoryClick(item.id)}>
 			<a>
@@ -48,17 +133,18 @@ export default function SidebarCategories(props) {
 		</li>
 	));
 
+	// Tạo các phần tử sách từ danh sách sách đã lọc
 	const bookItems = filteredBooks.map(book => (<>
-		<div class="col-xs-6 col-sm-6 col-md-4 col-lg-3">
+		<div class="col-xs-6 col-sm-6 col-md-4 col-lg-4">
 			<div class="tg-postbook">
 				<figure class="tg-featureimg">
-					<div class="tg-bookimg">
-						<div class="tg-frontcover"><img src="" alt="image description" /></div>
-						<div class="tg-backcover"><img src="images/books/img-01.jpg" alt="image description" /></div>
+					<div className="tg-bookimg">
+						<div class="tg-frontcover"><img src={`http://localhost:8000/` + book.image_list[0].front_cover} alt="image description" /></div>
+						<div class="tg-backcover"><img src={`http://localhost:8000/` + book.image_list[0].back_cover} alt="image description" /></div>
 					</div>
 					<a class="tg-btnaddtowishlist" href="javascript:void(0);">
 						<i class="icon-heart"></i>
-						<span>add to wishlist</span>
+						<span>Thêm vào danh sách yêu thích</span>
 					</a>
 				</figure>
 				<div class="tg-postbookcontent">
@@ -69,20 +155,19 @@ export default function SidebarCategories(props) {
 					<div class="tg-booktitle">
 						<h3><NavLink to={`detail/${book.id}`} >{book.name}</NavLink></h3>
 					</div>
-					<span class="tg-bookwriter">By: <a href="javascript:void(0);">Angela Gunning</a></span>
+					<span class="tg-bookwriter">Bởi tác giả: <a href="javascript:void(0);">{book.author.name}</a></span>
 					<span class="tg-stars"><span></span></span>
-					<span class="tg-bookprice">
-						<ins>$25.18</ins>
-						<del>$27.20</del>
-					</span>
-					<a class="tg-btn tg-btnstyletwo" href="javascript:void(0);">
-						<i class="fa fa-shopping-basket"></i>
-						<em>Add To Basket</em>
-					</a>
+					<OneBookPrice data={book.unit_price} />
+					<div className="but">
+						<a class="tg-btn tg-btnstyletwo" href="javascript:void(0);">
+							<div className="btn">
+								<i class="fa fa-shopping-basket"></i>
+								<em>Thêm vào giỏ hàng</em></div>
+						</a>
+					</div>
 				</div>
 			</div>
 		</div>
-		{/* <li key={book.id}>{book.name}</li> */}
 	</>
 
 	));
@@ -103,6 +188,12 @@ export default function SidebarCategories(props) {
 					</div>
 					<div className="tg-widgetcontent">
 						<ul>
+							<li onClick={() => handleBookClick()}>
+								<a>
+									<span>Tất cả thể loại</span>
+									<em></em>
+								</a>
+							</li>
 							{
 								categoryItems
 							}
@@ -116,32 +207,32 @@ export default function SidebarCategories(props) {
 					<div className="tg-widgetcontent">
 						<ul>
 							<li><div className="price">
-								<input type="checkbox" ></input>
-								<a onClick={() => handlePriceRangeChange(0, 150000)}>0đ - 150,000d</a>
+								<input onClick={() => handlePriceRangeChange(0, 150000)} type="checkbox" ></input>
+								<a onClick={() => handlePriceRangeChange(0, 150000)}>0đ - 150,000đ</a>
 							</div>
 							</li>
 							<li>
 								<div className="price">
-									<input type="checkbox" ></input>
+									<input onClick={() => handlePriceRangeChange(150000, 300000)} type="checkbox" ></input>
 									<a onClick={() => handlePriceRangeChange(150000, 300000)}>150,000đ - 300,000đ</a>
 								</div>
 							</li>
 							<li>
 								<div className="price">
-									<input type="checkbox" ></input>
+									<input onClick={() => handlePriceRangeChange(300000, 500000)} type="checkbox"  ></input>
 									<a onClick={() => handlePriceRangeChange(300000, 500000)}>300,000đ - 500,000đ</a>
 								</div>
 							</li>
 							<li>
 								<div className="price">
-									<input type="checkbox" ></input>
+									<input onClick={() => handlePriceRangeChange(500000, 700000)} type="checkbox" ></input>
 									<a onClick={() => handlePriceRangeChange(500000, 700000)}>500,000đ - 700,000đ</a>
 								</div>
 							</li>
 							<li>
 								<div className="price">
-									<input type="checkbox" ></input>
-									<a onClick={() => handlePriceRangeChange(700000, 9999999999999)}>700,000đ Trở lên</a>
+									<input onClick={() => handlePriceRangeChange(700000, Number.MAX_SAFE_INTEGER)} type="checkbox" ></input>
+									<a onClick={() => handlePriceRangeChange(700000, Number.MAX_SAFE_INTEGER)}>700,000đ Trở lên</a>
 								</div>
 							</li>
 						</ul>
@@ -258,8 +349,6 @@ export default function SidebarCategories(props) {
 			</aside>
 		</div>
 
-
-
 		<div class="col-xs-12 col-sm-8 col-md-8 col-lg-9 pull-right">
 			<div id="tg-content" class="tg-content">
 				<div class="tg-products">
@@ -304,12 +393,13 @@ export default function SidebarCategories(props) {
 							<form class="tg-formtheme tg-formsortshoitems">
 								<fieldset>
 									<div class="form-group">
-										<label>sort by:</label>
+										<label>Sort by:</label>
 										<span class="tg-select">
-											<select>
-												<option>name</option>
-												<option>name</option>
-												<option>name</option>
+											<select onChange={(e) => handleSortChange(e.target.value)}>
+												<option value="asc">Từ A-Z</option>
+												<option value="desc">Từ Z-A</option>
+												<option value="priceAsc">Giá tăng dần</option>
+												<option value="priceDesc">Giá giảm dần</option>
 											</select>
 										</span>
 									</div>
@@ -328,16 +418,27 @@ export default function SidebarCategories(props) {
 						</div>
 						{bookItems}
 
-
-
-
-
-
-
-
-
-
 					</div>
+					<ReactPaginate
+						nextLabel="next >"
+						onPageChange={handlePageClick}
+						pageCount={totalPages}
+						pageRangeDisplayed={3}
+						marginPagesDisplayed={2}
+						previousLabel="< previous"
+						pageClassName="page-item"
+						pageLinkClassName="page-link"
+						previousClassName="page-item"
+						previousLinkClassName="page-link"
+						nextClassName="page-item"
+						nextLinkClassName="page-link"
+						breakLabel="..."
+						breakClassName="page-item"
+						breakLinkClassName="page-link"
+						containerClassName="pagination"
+						activeClassName="active"
+						renderOnZeroPageCount={null}
+					/>
 				</div>
 			</div>
 		</div></>)

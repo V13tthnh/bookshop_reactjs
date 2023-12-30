@@ -10,7 +10,7 @@ import BookSort from "./book/book-sort";
 export default function Home(props) {
     const [listCategories, setListCategories] = useState([]);
     useEffect(() => {
-        axios('http://127.0.0.1:8000/api/loai-san-pham')
+        axios('http://127.0.0.1:8000/api/category')
             .then(reponse => reponse.data)
             .then(json => setListCategories(json.data))
             .catch((error) => {
@@ -40,7 +40,7 @@ export default function Home(props) {
                                     </div>
                                 </div>
                             </div>
-                            <SidebarCategories data={listCategories}/>
+                            <SidebarCategories data={listCategories} itemsPerPage={4}/>
                         </div>
                     </div>
                 </div>

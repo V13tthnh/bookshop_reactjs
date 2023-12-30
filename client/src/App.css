@@ -57,7 +57,6 @@
   .carousel .carousel-indicators .active {
     background-color: #444;
   }
-  
   /* Only for beautify example */
   h1 {
     margin: 60px auto;
@@ -65,32 +64,19 @@
   }
   
   img {
-    width: 80%;
+    width: 100%;
   }
-  
-  /*wishlist*/
-button.onAppWishList_remove {
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  font-size: 16px;
-  width: 30px;
-  height: 30px;
+.but{
+  width: 200px;
+}
+.btn{
+  display: flex;
   text-align: center;
-  line-height: 30px;
-  background: #d51c24;
-  color: #fff;
-  border-radius: 5px;
-}
-.delAll{
-  margin-top: 20px;
-  margin-bottom: 10px;
-  margin-right: 40px;
-}
-.text-right{
-  text-align: right;
 }
 .price{
   display: flex;
-  margin-left: 10px;
+}
+.price a{
+  text-align: center;
+  margin-left: 15px;
 }
