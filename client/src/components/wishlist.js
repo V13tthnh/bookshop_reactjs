@@ -42,7 +42,8 @@ export default function Wishlist() {
                             <div class="tg-postbook">
                                 <figure class="tg-featureimg">
                                     <div class="tg-bookimg">
-                                        <div class="tg-frontcover"><img src="book3.jpg" alt="image description" />
+                                        {console.log(item.image_list)}
+                                        <div class="tg-frontcover"><img src={`http://localhost:8000/` + item.image_list}  alt="image description" />
                                         <button class="tg-btnaddtowishlist" onClick={()=>removeWishlist(item.id)}>
                                             <i class="icon-trash"></i>
                                             <span>Xóa khỏi wishlist</span>
