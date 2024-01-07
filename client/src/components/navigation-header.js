@@ -26,7 +26,7 @@ export default function NavigationHeader(props) {
                                     <NavLink to={'/'}>Home</NavLink>
                                 </li>
                                 <li className="menu-item-has-children menu-item-has-mega-menu">
-                                    <a href="">Thể loại</a>
+                                    <NavLink to={'/product'}>Thể loại</NavLink>
                                     <div className="mega-menu">
                                         <ul className="tg-themetabnav" role="tablist">
                                             {/* <li role="presentation" className="active">

@@ -1,105 +1,119 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { NavLink } from "react-router-dom";
-import { redirect } from "react-router-dom";
 import BookImg from "./book-img";
 import OneBookAuthor from "./one-book-author";
 import OneBookPrice from "./one-book-price";
-import OneBookTitle from "./one-book-title";
-import { useParams } from 'react-router-dom';
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { add, addCombo } from "../../reducers/cartSlice";
+import Swal from 'sweetalert2';
+import { error } from "jquery";
+import Comment from "../comment";
+
 export default function OneBookDetail(product) {
+	const dispatch = useDispatch();
+
 	const [productList, setProductList] = useState([]);
 	const [currentProduct, setCurrentProduct] = useState(product);
 
-	const fetchData = async (categoryId) => {
-		try {
-		  const response = await axios.get(`http://127.0.0.1:8000/api/books/${categoryId}`);
-		  console.log("Response data:", response.data.data);
-		  setProductList(response.data.data);
-		} catch (error) {
-		  console.error(error);
-		}
-	  };
-	
-	  useEffect(() => {
-		fetchData(product.data.category_id);
-	  }, [product.data.category_id]);
-	// Sử dụng useEffect để gọi API và cập nhật state 
-	// useEffect(() => {
-	// 	const fetchData = async () => {
-	// 	  try {
-	// 		const response = await axios.get(
-	// 		  `http://127.0.0.1:8000/api/books/${product.data.category_id}`
-	// 		);
+	useEffect(() => {
+		// axios.get(`http://127.0.0.1:8000/api/related-books/${product.data.id}`, {'Accept': 'Application/json'})
+		// .then(response => setCurrentProduct(response.data))
+		// .then(error => console.log(error));
+	}, [])
+
+	// const fetchData = async (firstCategory) => {
+	// 	try {
+	// 		const response = await axios.get(`http://127.0.0.1:8000/api/books/${firstCategory}`);
+	// 		console.log("Response data:", response.data.data);
 	// 		setProductList(response.data.data);
-	// 	  } catch (error) {
+	// 	} catch (error) {
 	// 		console.error(error);
-	// 	  }
-	// 	};
+	// 	}
+	// };
 
-	// 	fetchData();
-	//   }, [product.data.category_id]);
-
+	// useEffect(() => {
+	// 	var firstCategory = product.data.categories && product.data.categories.length > 0
+	// 		? product.data.categories[0].id
+	// 		: null;
+	// 	console.log(firstCategory);
+	// 	fetchData(firstCategory);
+	// }, []);
 
 	// Hàm thêm sản phẩm vào wishlist 
-	const add = () => {
-		// console.log(product.data.author.name);
-		var book = { id: product.data.id, name: product.data.name };
-		var cartItems = localStorage.getItem('wishlist');
-		if (cartItems == null) {
-			cartItems = [book];
+	const addToWishList = () => {
+		var book = { id: product.data.id, name: product.data.name, image: product.data.images[0]?.front_cover };
+		var wishListItems = localStorage.getItem('wishlist');
+		if (wishListItems == null) {
+			wishListItems = [book];
 		} else {
-			cartItems = JSON.parse(cartItems);
-			cartItems.push(book);
+			wishListItems = JSON.parse(wishListItems);
+			wishListItems.push(book);
 		}
-		localStorage.setItem('wishlist', JSON.stringify(cartItems));
-		alert('Them sach vao wishlist thanh cong');
+		localStorage.setItem('wishlist', JSON.stringify(wishListItems));
+		Swal.fire({
+			position: "top-end",
+			icon: "success",
+			title: "Đã thêm sách vào wishlist!",
+			showConfirmButton: false,
+			timer: 1500
+		});
+
 	}
+
+	// Hàm thêm sản phẩm vào giỏ hàng
+	const addToCart = () => {
+		dispatch(add(product.data));
+
+		Swal.fire({
+			position: "top-end",
+			icon: "success",
+			title: "Sách đã được thêm vào giỏ hàng!",
+			showConfirmButton: false,
+			timer: 1500
+		});
+	}
+
 	const handleRelatedProductClick = (selectedProduct) => {
 		console.log("Clicked on related product:", selectedProduct);
 		setCurrentProduct(selectedProduct);
 		setTimeout(() => {
 			window.location.reload();
-		  }, 100);
-		// You can perform additional actions here if needed.
-	  };
+		}, 100);
+	};
+
 	// Map qua danh sách sản phẩm để hiển thị các sản phẩm liên quan
 	const bookItems = productList.map(book => (<>
 		<div key={book.id} class="col-xs-6 col-sm-6 col-md-4 col-lg-4">
 			<div class="tg-postbook">
 				<figure class="tg-featureimg">
 					<div className="tg-bookimg">
-						<div class="tg-frontcover"><img src={`http://localhost:8000/` + book.image_list[0].front_cover} alt="image description" /></div>
-						<div class="tg-backcover"><img src={`http://localhost:8000/` + book.image_list[0].back_cover} alt="image description" /></div>
+						<div class="tg-frontcover"><img src={`http://localhost:8000/` + book.images[0].front_cover} alt="image description" /></div>
+						<div class="tg-backcover"><img src={`http://localhost:8000/` + book.images[0].back_cover} alt="image description" /></div>
 					</div>
 					<a class="tg-btnaddtowishlist" href="javascript:void(0);">
 						<i class="icon-heart"></i>
-						<span>Thêm vào danh sách yêu thích</span>
+						<span>Thêm vào wishlist</span>
 					</a>
 				</figure>
 				<div class="tg-postbookcontent">
-					<ul class="tg-bookscategories">
-						<li><a href="javascript:void(0);">Art &amp; Photography</a></li>
-					</ul>
 					<div class="tg-themetagbox"><span class="tg-themetag">sale</span></div>
 					<div class="tg-booktitle">
 						{/* <h3> <NavLink to={`/detail/${book.id}`}>{book.name}</NavLink></h3> */}
 						{/* <h3 ><a href="" onClick={() => handleRelatedProductClick(book)}>{book.name}</a></h3> */}
 						{/* <NavLink to={`/detail/${book.id}`} onClick={() => handleRelatedProductClick(book)}>{book.name}</NavLink> */}
-						<NavLink to={`/detail/${book.id}`} onClick={() => handleRelatedProductClick(book)}>{book.name}  </NavLink>
-						<Link to={`/detail/${book.id}`} onClick={() => handleRelatedProductClick(book.id)}>
+						<NavLink to={`/detail/${book.id}`} >{book.name}  </NavLink>
+						<Link to={`/detail/${book.id}`}>
 							{book.name}
 						</Link>
 						{/* <h3><NavLink to={`/detail/${book.id}`} href="javascript:void(0);">{book.name}</NavLink></h3> */}
 					</div>
-
-					<span class="tg-bookwriter">Bởi tác giả: <a href="javascript:void(0);">{book.author.name}</a></span>
+					<span class="tg-bookwriter">Bởi tác giả: <a href="javascript:void(0);">{book.authors.map(item => { return (<>{item.name}</>) })}</a></span>
 					<span class="tg-stars"><span></span></span>
-
 					<OneBookPrice data={book.unit_price} />
 					<div className="but">
-						<a class="tg-btn tg-btnstyletwo" href="javascript:void(0);">
+						<a class="tg-btn tg-btnstyletwo" >
 							<div className="btn">
 								<i class="fa fa-shopping-basket"></i>
 								<em>Thêm vào giỏ hàng</em></div>
@@ -123,30 +137,23 @@ export default function OneBookDetail(product) {
 											<div className="col-xs-12 col-sm-12 col-md-4 col-lg-4">
 												<div className="tg-postbook">
 													<figure className="tg-featureimg">
-														{/* <img src={`http://localhost:8000/` + product.data.image_list[0].front_cover} alt="image description" /> */}
-														<BookImg data={product.data.image_list} />
+														<BookImg data={product.data.images} />
 													</figure>
 													<div className="tg-postbookcontent">
-														{/* <span className="tg-bookprice">
-															<ins>{product.data.unit_price}</ins>
-															<del>$27.20</del>
-															<ins>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.data.unit_price)}</ins>
-														</span> */}
 														<OneBookPrice data={product.data.unit_price} />
-														<span className="tg-bookwriter">You save $4.02</span>
 														<ul className="tg-delevrystock">
 															<li><i className="icon-rocket"></i><span>Free delivery worldwide</span></li>
 															<li><i className="icon-checkmark-circle"></i><span>Dispatch from the USA in 2 working days </span></li>
-															<li><i className="icon-store"></i><span>Status: <em>In Stock</em></span></li>
+															<li><i className="icon-store"></i><span>Status: <em>{product.data.quantity > 0 ? 'Còn hàng' : 'Đã hết hàng'}</em></span></li>
 														</ul>
 														<div className="tg-quantityholder">
 															<em className="minus">-</em>
 															<input type="text" className="result" value="0" id="quantity1" name="quantity" />
 															<em className="plus">+</em>
 														</div>
-														<a className="tg-btn tg-active tg-btn-lg" href="javascript:void(0);">Thêm vào giỏ hàng</a>
+														<button className="tg-btn tg-active tg-btn-lg" onClick={addToCart}>Thêm vào giỏ hàng</button>
 														<a className="tg-btnaddtowishlist" href="javascript:void(0);">
-															<span onClick={add}>Thêm vào danh sách yêu thích</span>
+															<span onClick={addToWishList}>Thêm vào wishlist</span>
 														</a>
 													</div>
 												</div>
@@ -160,9 +167,7 @@ export default function OneBookDetail(product) {
 													<div className="tg-booktitle">
 														<h3>{product.data.name}</h3>
 													</div>
-													{/* <span className="tg-bookwriter">Bởi tác giả: <a href="javascript:void(0);">{product.data.author.name}</a></span> */}
-													<OneBookAuthor data={product.data.author?.name} />
-													{/* {console.log(product.data.author.name)} */}
+													<OneBookAuthor data={product.data.authors} />
 													<span className="tg-stars"><span></span></span>
 													<span className="tg-addreviews"><a href="javascript:void(0);">Add Your Review</a></span>
 													<div className="tg-share">
@@ -175,9 +180,9 @@ export default function OneBookDetail(product) {
 															<li className="tg-rss"><a href="javascript:void(0);"><i className="fa fa-rss"></i></a></li>
 														</ul>
 													</div>
-													<div className="tg-description">
+													{/* <div className="tg-description">
 														<p>{product.data.description} <a href="javascript:void(0);">...</a></p>
-													</div>
+													</div> */}
 													<div className="tg-sectionhead">
 														<h2>Thông tin sản phẩm</h2>
 													</div>
@@ -191,7 +196,6 @@ export default function OneBookDetail(product) {
 														<li><span>Nhà xuất bản:</span><span>{product.data.publisher?.name}</span></li>
 														<li><span>Ngôn ngữ:</span><span>{product.data.language}</span></li>
 														<li><span>Người phiên dịch:</span><span>{product.data.translator}</span></li>
-														<li><span>Other Fomate:</span><span>CD-Audio, Paperback, E-Book</span></li>
 													</ul>
 
 												</div>
@@ -199,62 +203,30 @@ export default function OneBookDetail(product) {
 											<div className="tg-productdescription">
 												<div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 													<div className="tg-sectionhead">
-														<h2>Đánh giá sản phẩm</h2>
+														<h2>Mô tả & Bình luận sản phẩm</h2>
 													</div>
 													<ul className="tg-themetabs" role="tablist">
-														<li role="presentation" className="active"><a href="#description" data-toggle="tab">Description</a></li>
-														<li role="presentation"><a href="#review" data-toggle="tab">Reviews</a></li>
+														<li role="presentation" className="active"><a href="#description" data-toggle="tab">Mô tả</a></li>
+														<li role="presentation"><a href="#review" data-toggle="tab">Bình luận</a></li>
 													</ul>
 													<div className="tg-tab-content tab-content">
 														<div role="tabpanel" className="tg-tab-pane tab-pane active" id="description">
 															<div className="tg-description">
-																<p>Consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veni quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenden
-																	voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-																<figure className="tg-alignleft">
-																	<img src="images/placeholdervtwo.jpg" alt="image description" />
-																	<iframe src="https://www.youtube.com/embed/aLwpuDpZm1k?rel=0&amp;controls=0&amp;showinfo=0"></iframe>
-																</figure>
-																<ul className="tg-liststyle">
-																	<li><span>Sed do eiusmod tempor incididunt ut labore et dolore</span></li>
-																	<li><span>Magna aliqua enim ad minim veniam</span></li>
-																	<li><span>Quis nostrud exercitation ullamco laboris nisi ut</span></li>
-																	<li><span>Aliquip ex ea commodo consequat aute dolor reprehenderit</span></li>
-																	<li><span>Voluptate velit esse cillum dolore eu fugiat nulla pariatur</span></li>
-																	<li><span>Magna aliqua enim ad minim veniam</span></li>
-																	<li><span>Quis nostrud exercitation ullamco laboris nisi ut</span></li>
-																</ul>
-																<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam remmata aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enimsam
-																	voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos quistatoa.</p>
+																{product.data.description}
 															</div>
 														</div>
 														<div role="tabpanel" className="tg-tab-pane tab-pane" id="review">
 															<div className="tg-description">
-																<p>Consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veni quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenden
-																	voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-																<figure className="tg-alignleft">
-																	<img src="images/placeholdervtwo.jpg" alt="image description" />
-																	<iframe src="https://www.youtube.com/embed/aLwpuDpZm1k?rel=0&amp;controls=0&amp;showinfo=0"></iframe>
-																</figure>
-																<ul className="tg-liststyle">
-																	<li><span>Sed do eiusmod tempor incididunt ut labore et dolore</span></li>
-																	<li><span>Magna aliqua enim ad minim veniam</span></li>
-																	<li><span>Quis nostrud exercitation ullamco laboris nisi ut</span></li>
-																	<li><span>Aliquip ex ea commodo consequat aute dolor reprehenderit</span></li>
-																	<li><span>Voluptate velit esse cillum dolore eu fugiat nulla pariatur</span></li>
-																	<li><span>Magna aliqua enim ad minim veniam</span></li>
-																	<li><span>Quis nostrud exercitation ullamco laboris nisi ut</span></li>
-																</ul>
-																<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam remmata aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enimsam
-																	voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos quistatoa.</p>
+																<Comment/>
 															</div>
 														</div>
 													</div>
 												</div>
 											</div>
-											<div className="tg-aboutauthor">
+											{/* <div className="tg-aboutauthor">
 												<div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 													<div className="tg-sectionhead">
-														<h2>About Author</h2>
+														<h2>Về tác giả</h2>
 													</div>
 													<div className="tg-authorbox">
 														<figure className="tg-authorimg">
@@ -285,12 +257,12 @@ export default function OneBookDetail(product) {
 														</div>
 													</div>
 												</div>
-											</div>
+											</div> */}
 											<div className="tg-relatedproducts">
 												<div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 													<div className="tg-sectionhead">
 														<h2><span>Sách liên quan</span>Có thể bạn sẽ thích</h2>
-														<a className="tg-btn" href="javascript:void(0);">View All</a>
+														<a className="tg-btn" href="javascript:void(0);">Xem tất cả</a>
 													</div>
 													{bookItems}
 												</div>
@@ -330,122 +302,8 @@ export default function OneBookDetail(product) {
 											</ul>
 										</div>
 									</div>
-									<div className="tg-widget tg-widgettrending">
-										<div className="tg-widgettitle">
-											<h3>Trending Products</h3>
-										</div>
-										<div className="tg-widgetcontent">
-											<ul>
-												<li>
-													<article className="tg-post">
-														<figure><a href="javascript:void(0);"><img src="images/products/img-04.jpg" alt="image description" /></a></figure>
-														<div className="tg-postcontent">
-															<div className="tg-posttitle">
-																<h3><a href="javascript:void(0);">Where The Wild Things Are</a></h3>
-															</div>
-															<span className="tg-bookwriter">By: <a href="javascript:void(0);">Kathrine Culbertson</a></span>
-														</div>
-													</article>
-												</li>
-												<li>
-													<article className="tg-post">
-														<figure><a href="javascript:void(0);"><img src="images/products/img-05.jpg" alt="image description" /></a></figure>
-														<div className="tg-postcontent">
-															<div className="tg-posttitle">
-																<h3><a href="javascript:void(0);">Where The Wild Things Are</a></h3>
-															</div>
-															<span className="tg-bookwriter">By: <a href="javascript:void(0);">Kathrine Culbertson</a></span>
-														</div>
-													</article>
-												</li>
-												<li>
-													<article className="tg-post">
-														<figure><a href="javascript:void(0);"><img src="images/products/img-06.jpg" alt="image description" /></a></figure>
-														<div className="tg-postcontent">
-															<div className="tg-posttitle">
-																<h3><a href="javascript:void(0);">Where The Wild Things Are</a></h3>
-															</div>
-															<span className="tg-bookwriter">By: <a href="javascript:void(0);">Kathrine Culbertson</a></span>
-														</div>
-													</article>
-												</li>
-												<li>
-													<article className="tg-post">
-														<figure><a href="javascript:void(0);"><img src="images/products/img-07.jpg" alt="image description" /></a></figure>
-														<div className="tg-postcontent">
-															<div className="tg-posttitle">
-																<h3><a href="javascript:void(0);">Where The Wild Things Are</a></h3>
-															</div>
-															<span className="tg-bookwriter">By: <a href="javascript:void(0);">Kathrine Culbertson</a></span>
-														</div>
-													</article>
-												</li>
-											</ul>
-										</div>
-									</div>
-									<div className="tg-widget tg-widgetinstagram">
-										<div className="tg-widgettitle">
-											<h3>Instagram</h3>
-										</div>
-										<div className="tg-widgetcontent">
-											<ul>
-												<li>
-													<figure>
-														<img src="images/instagram/img-01.jpg" alt="image description" />
-														<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-													</figure>
-												</li>
-												<li>
-													<figure>
-														<img src="images/instagram/img-02.jpg" alt="image description" />
-														<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-													</figure>
-												</li>
-												<li>
-													<figure>
-														<img src="images/instagram/img-03.jpg" alt="image description" />
-														<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-													</figure>
-												</li>
-												<li>
-													<figure>
-														<img src="images/instagram/img-04.jpg" alt="image description" />
-														<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-													</figure>
-												</li>
-												<li>
-													<figure>
-														<img src="images/instagram/img-05.jpg" alt="image description" />
-														<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-													</figure>
-												</li>
-												<li>
-													<figure>
-														<img src="images/instagram/img-06.jpg" alt="image description" />
-														<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-													</figure>
-												</li>
-												<li>
-													<figure>
-														<img src="images/instagram/img-07.jpg" alt="image description" />
-														<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-													</figure>
-												</li>
-												<li>
-													<figure>
-														<img src="images/instagram/img-08.jpg" alt="image description" />
-														<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-													</figure>
-												</li>
-												<li>
-													<figure>
-														<img src="images/instagram/img-09.jpg" alt="image description" />
-														<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-													</figure>
-												</li>
-											</ul>
-										</div>
-									</div>
+
+
 
 								</aside>
 							</div>
