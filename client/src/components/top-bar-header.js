@@ -1,27 +1,38 @@
+import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
+import { logout, setUser } from "../reducers/authSlice";
+import { getStoredState } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
 export default function TopBarHeader() {
+    const userData = useSelector(state => state.auth.userData);
+    const token = useSelector(state => state.auth.token);
+    const isLogin = useSelector(state => state.auth.isLoggedIn);
+    const dispatch = useDispatch();
+
     const logoutHandler = () => {
-        localStorage.removeItem('token');
-        //  navigate('/');
+        dispatch(logout());
     }
+
     const render = () => {
-        if (localStorage.getItem('token') ) {
-            const info = JSON.parse(localStorage.getItem('user'));
-            console.log(info.name);
-            return ( 
+        if (isLogin) {
+            return (
                 <div className="tg-userlogin" >
-                     <h6  className="dangnhap">hello {info.name} <a href="" className="dangxuat" onClick={logoutHandler}>Dang Xuat</a></h6>
-                 </div>
-          
+                    <figure>
+                        <NavLink to="/account"><img src="assets_2/images/users/user01.jpg" alt="image description" /></NavLink>
+                    </figure>
+                    <li><a href="" className="dangxuat" onClick={logoutHandler}>Đăng xuất</a></li>
+                </div>
             );
         }
         else {
             return (
                 <>
-                    <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#login">
+                    <NavLink to="/login" type="button" className="btn btn-primary" >
                         Đăng Nhập
-                    </button> /
+                    </NavLink>
                     <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#register">
                         Đăng ký
                     </button>
@@ -30,7 +41,6 @@ export default function TopBarHeader() {
         }
     }
     return (<>
-
         <div className="tg-topbar">
             <div className="container">
                 <div className="row">
@@ -52,10 +62,6 @@ export default function TopBarHeader() {
 
                         <div className="tg-userlogin">
                             {render()}
-
-
-                            {/* <figure><a href=""><img src="images/users/img-01.jpg" alt="image description" /></a></figure>
-                        <span>Hi, John</span> */}
                         </div>
                     </div>
                 </div>

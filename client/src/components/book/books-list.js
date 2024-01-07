@@ -6,7 +6,4 @@ export default function BooksList(props) {
     const list = props.data.map((item) => {
         return (<><OneBook data={item}/></>);
     })
-    return (<>
-        {/* {list} */}
-    </>)
 }

@@ -1,10 +1,16 @@
 import { useEffect, useState, useRef } from "react"
 import axios from "axios";
+import React from 'react'
 import { NavLink } from "react-router-dom";
 import OneBookPrice from "../book/one-book-price";
 import ReactPaginate from 'react-paginate';
+import { useDispatch, useSelector } from "react-redux";
+import { add, addCombo } from "../../reducers/cartSlice";
+import Swal from 'sweetalert2';
 
 export default function SidebarCategories(props) {
+	const dispatch = useDispatch();
+	const cartItems = useSelector((state) => state.cart.carts);
 	// Lấy tất cả các ô checkbox và thêm sự kiện change để thực hiện hàm tick
 	let boxes = document.querySelectorAll("input[type=checkbox]");
 	boxes.forEach(b => b.addEventListener("change", tick));
@@ -15,7 +21,7 @@ export default function SidebarCategories(props) {
 		boxes.forEach(b => b.checked = false); // Xóa chọn tất cả các ô checkbox
 		e.target.checked = state; // Khôi phục trạng thái của ô checkbox đã thay đổi
 	}
-	  // State và effect hooks để quản lý danh sách thể loại sách và các thông tin liên quan
+	// State và effect hooks để quản lý danh sách thể loại sách và các thông tin liên quan
 	const [listCategories, setListCategories] = useState([]); // Danh sách thể loại sách
 	const [selectedCategory, setSelectedCategory] = useState(null); // Thể loại đang được chọn
 	const [filteredBooks, setFilteredBooks] = useState([]); // Danh sách sách sau khi lọc
@@ -23,7 +29,8 @@ export default function SidebarCategories(props) {
 	const [maxPrice, setMaxPrice] = useState(Number.MAX_SAFE_INTEGER); // Giá sách tối đa
 	const [totalPages, setTotalPages] = useState(0);
 	const [newPage, setNewPage] = useState(0);
-  	const [selectedPriceRange, setSelectedPriceRange] = useState({ min: 0, max: Number.MAX_SAFE_INTEGER });
+	const [selectedPriceRange, setSelectedPriceRange] = useState({ min: 0, max: Number.MAX_SAFE_INTEGER });
+	const [listCombo, setListCombo] = useState([]);
 
 	// Khai báo state và hàm để lựa chọn thứ tự sắp xếp sách
 	const [sortOrder, setSortOrder] = useState("asc");
@@ -42,7 +49,7 @@ export default function SidebarCategories(props) {
 		}
 		setFilteredBooks(sortedBooks);
 	};
-  // useEffect hook để thêm sự kiện change cho tất cả các ô checkbox khi component được render
+	// useEffect hook để thêm sự kiện change cho tất cả các ô checkbox khi component được render
 	useEffect(() => {
 		let boxes = document.querySelectorAll("input[type=checkbox]");
 		boxes.forEach(b => b.addEventListener("change", tick));
@@ -50,8 +57,7 @@ export default function SidebarCategories(props) {
 			boxes.forEach(b => b.removeEventListener("change", tick));
 		};
 	}, []);
-
-  // useEffect hook để fetch danh sách thể loại từ API khi component được render
+	// useEffect hook để fetch danh sách thể loại từ API khi component được render
 	useEffect(() => {
 		axios.get('http://127.0.0.1:8000/api/category')
 			.then(response => response.data)
@@ -66,100 +72,154 @@ export default function SidebarCategories(props) {
 		setMaxPrice(Number.MAX_SAFE_INTEGER); // Set giá lớn nhất
 		setSelectedPriceRange({ min: 0, max: Number.MAX_SAFE_INTEGER });
 		try {
-		  const response = await axios.get(`http://127.0.0.1:8000/api/books?page=${newPage}`);
-		  if (response?.data) {
-			setFilteredBooks(response.data.data || []);
-			setTotalPages(response.data.total_pages || 0);
-		  }
+			const response = await axios.get(`http://127.0.0.1:8000/api/books?page=${newPage}`);
+			if (response?.data) {
+				setFilteredBooks(response.data.data || []);
+				setTotalPages(response.data.total_pages || 0);
+			}
 		} catch (error) {
-		  console.error("Error fetching data:", error);
+			console.error("Error fetching data:", error);
 		}
-	  };
-	
-	  // Hàm xử lý khi người dùng click vào một thể loại sách cụ thể
+	};
+
+	const bookTypeClickHandler = async () => {
+		setNewPage(1); // Set lại trang là 1
+		setSelectedCategory(null); // Đặt lại thể loại là rỗng
+		setFilteredBooks([]); 
+		setMinPrice(0);
+		setMaxPrice(Number.MAX_SAFE_INTEGER);
+		try {
+			const response = await axios.get(`http://127.0.0.1:8000/api/combos?page=${newPage}`);
+			if (response?.data) {
+				setListCombo(response.data.data || []);
+				setTotalPages(response.data.total_pages || 0);
+			}
+			console.log(listCombo);
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		}
+	}
+
+	// Hàm xử lý khi người dùng click vào một thể loại sách cụ thể
 	const handleCategoryClick = async (categoryId) => {
 		setNewPage(1);
 		setSelectedCategory(categoryId);
 		setSelectedPriceRange({ min: 0, max: Number.MAX_SAFE_INTEGER });
-	  };
+	};
 
 	// Hàm xử lý khi người dùng thay đổi khoảng giá sách
 	const handlePriceRangeChange = async (min, max) => {
 		setMinPrice(min);
 		setMaxPrice(max);
 		setNewPage(1);
-		setSelectedCategory(null); 
+		setSelectedCategory(null);
 		setSelectedPriceRange({ min, max });
-	  };
+	};
 
-	  // Hàm xử lý khi người dùng click vào một trang cụ thể
+	// Hàm xử lý khi người dùng click vào một trang cụ thể
 	const handlePageClick = ({ selected }) => {
 		const nextPage = selected + 1;
-		setNewPage(nextPage); 
+		setNewPage(nextPage);
 	};
 
 	// useEffect hook để fetch dữ liệu sách dựa trên các thay đổi trong trạng thái
 	useEffect(() => {
 		const fetchData = async () => {
-		  try {
-			let url = `http://127.0.0.1:8000/api/books?page=${newPage}`; 
-	
-			if (selectedCategory) {
-			  url = `http://127.0.0.1:8000/api/filter-books/${selectedCategory}?page=${newPage}`;
-			} else if (selectedPriceRange.min !== 0 || selectedPriceRange.max !== Number.MAX_SAFE_INTEGER) {
-			  url = `http://127.0.0.1:8000/api/filter-books-by-price/${selectedPriceRange.min}/${selectedPriceRange.max}?page=${newPage}`;
+			try {
+				let url = `http://127.0.0.1:8000/api/books?page=${newPage}`;
+				//console.log(selectedCategory);
+				if (selectedCategory) {
+					url = `http://127.0.0.1:8000/api/filter-books/${selectedCategory}?page=${newPage}`;
+				} else if (selectedPriceRange.min !== 0 || selectedPriceRange.max !== Number.MAX_SAFE_INTEGER) {
+					url = `http://127.0.0.1:8000/api/filter-books-by-price/${selectedPriceRange.min}/${selectedPriceRange.max}?page=${newPage}`;
+				}
+				const response = await axios.get(url);
+				if (response?.data) {
+					setFilteredBooks(response.data.data || []);
+					setTotalPages(response.data.total_pages || 0);
+				}
+			} catch (error) {
+				console.error("Error fetching data:", error);
 			}
-	
-			const response = await axios.get(url);
-			if (response?.data) {
-			  setFilteredBooks(response.data.data || []);
-			  setTotalPages(response.data.total_pages || 0);
-			}
-		  } catch (error) {
-			console.error("Error fetching data:", error);
-		  }
 		};
-	
 		fetchData();
-	  }, [selectedCategory, selectedPriceRange, newPage]);
-	
+	}, [selectedCategory, selectedPriceRange, newPage]);
+
 	// Tạo các phần tử thể loại sách từ danh sách thể loại
 	const categoryItems = listCategories.map(item => (
-		<li key={item.id} onClick={() => handleCategoryClick(item.id)}>
-			<a>
+		<li >
+			<a href="javascript:void(0);" key={item.id} onClick={() => handleCategoryClick(item.id)}>
 				<span>{item.name}</span>
-				<em>{item.list_book_count}</em>
+				<em>{item.books_count}</em>
 			</a>
 		</li>
 	));
 
+	// Hàm thêm sản phẩm vào wishlist 
+	const addToWishList = (id) => {
+		// Tìm sản phẩm vừa chọn theo id
+		const result = filteredBooks.find(item => item.id === id);
+		// Thực hiện thêm vào wishlist
+		var book = { id: result.id, name: result.name, image: result.images[0]?.front_cover };
+		var wishListItems = localStorage.getItem('wishlist');
+		if (wishListItems == null) {
+			wishListItems = [book];
+		} else {
+			wishListItems = JSON.parse(wishListItems);
+			wishListItems.push(book);
+		}
+		localStorage.setItem('wishlist', JSON.stringify(wishListItems));
+		alert('Them sach vao wishlist thanh cong');
+		console.log(wishListItems);
+	}
+
+	//Hàm thêm sản phẩm vào giỏ hàng
+	const addBookToCart = (id) => {
+		const result = filteredBooks.find(item => item.id === id);
+		dispatch(add(result));
+		Swal.fire({
+			position: "top-end",
+			icon: "success",
+			title: "Sách đã được thêm vào giỏ hàng!",
+			showConfirmButton: false,
+			timer: 1500
+		});
+	}
+
+	const addComboToCart = (id) => {
+		const result = listCombo.find(item => item.id === id);
+		dispatch(addCombo(result));
+		Swal.fire({
+			position: "top-end",
+			icon: "success",
+			title: "Combo đã được thêm vào giỏ hàng!",
+			showConfirmButton: false,
+			timer: 1500
+		});
+	}
+
 	// Tạo các phần tử sách từ danh sách sách đã lọc
-	const bookItems = filteredBooks.map(book => (<>
+	const comboItems = listCombo.map(combo => (<>
 		<div class="col-xs-6 col-sm-6 col-md-4 col-lg-4">
 			<div class="tg-postbook">
 				<figure class="tg-featureimg">
 					<div className="tg-bookimg">
-						<div class="tg-frontcover"><img src={`http://localhost:8000/` + book.image_list[0].front_cover} alt="image description" /></div>
-						<div class="tg-backcover"><img src={`http://localhost:8000/` + book.image_list[0].back_cover} alt="image description" /></div>
+						<div class="tg-frontcover"><img src={`http://localhost:8000/` + combo.image} alt="image description" /></div>
 					</div>
-					<a class="tg-btnaddtowishlist" href="javascript:void(0);">
+					<a class="tg-btnaddtowishlist" onClick={() => addToWishList(combo.id)} href="javascript:void(0);">
 						<i class="icon-heart"></i>
-						<span>Thêm vào danh sách yêu thích</span>
+						<span>Thêm vào wishlist</span>
 					</a>
 				</figure>
 				<div class="tg-postbookcontent">
-					<ul class="tg-bookscategories">
-						<li><a href="javascript:void(0);">Art &amp; Photography</a></li>
-					</ul>
 					<div class="tg-themetagbox"><span class="tg-themetag">sale</span></div>
 					<div class="tg-booktitle">
-						<h3><NavLink to={`detail/${book.id}`} >{book.name}</NavLink></h3>
+						<h3><NavLink to={`detail/${combo.id}`} >{combo.name}</NavLink></h3>
 					</div>
-					<span class="tg-bookwriter">Bởi tác giả: <a href="javascript:void(0);">{book.author.name}</a></span>
 					<span class="tg-stars"><span></span></span>
-					<OneBookPrice data={book.unit_price} />
+					<OneBookPrice data={combo.price} />
 					<div className="but">
-						<a class="tg-btn tg-btnstyletwo" href="javascript:void(0);">
+						<a class="tg-btn tg-btnstyletwo" onClick={() => addComboToCart(combo.id)} href="javascript:void(0);">
 							<div className="btn">
 								<i class="fa fa-shopping-basket"></i>
 								<em>Thêm vào giỏ hàng</em></div>
@@ -169,8 +229,40 @@ export default function SidebarCategories(props) {
 			</div>
 		</div>
 	</>
-
 	));
+	const bookItems = filteredBooks.map(book => (<>
+		<div class="col-xs-6 col-sm-6 col-md-4 col-lg-4">
+			<div class="tg-postbook">
+				<figure class="tg-featureimg">
+					<div className="tg-bookimg">
+						<div class="tg-frontcover"><img src={`http://localhost:8000/` + book.images[0].front_cover} alt="image description" /></div>
+						<div class="tg-backcover"><img src={`http://localhost:8000/` + book.images[0].back_cover} alt="image description" /></div>
+					</div>
+					<a class="tg-btnaddtowishlist" onClick={() => addToWishList(book.id)} href="javascript:void(0);">
+						<i class="icon-heart"></i>
+						<span>Thêm vào wishlist</span>
+					</a>
+				</figure>
+				<div class="tg-postbookcontent">
+					<div class="tg-themetagbox"><span class="tg-themetag">sale</span></div>
+					<div class="tg-booktitle">
+						<h3><NavLink to={`detail/${book.id}`} >{book.name}</NavLink></h3>
+					</div>
+					<span class="tg-stars"><span></span></span>
+					<OneBookPrice data={book.unit_price} />
+					<div className="but">
+						<a class="tg-btn tg-btnstyletwo" onClick={() => addBookToCart(book.id)} href="javascript:void(0);">
+							<div className="btn">
+								<i class="fa fa-shopping-basket"></i>
+								<em>Thêm vào giỏ hàng</em></div>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</>
+	));
+
 	return (<>
 		<div className="col-xs-12 col-sm-4 col-md-4 col-lg-3 pull-left">
 			<aside id="tg-sidebar" className="tg-sidebar">
@@ -194,9 +286,7 @@ export default function SidebarCategories(props) {
 									<em></em>
 								</a>
 							</li>
-							{
-								categoryItems
-							}
+							{categoryItems}
 						</ul>
 					</div>
 				</div>
@@ -238,109 +328,28 @@ export default function SidebarCategories(props) {
 						</ul>
 					</div>
 				</div>
-				<div className="tg-widget tg-widgetinstagram">
+				<div className="tg-widget tg-widgettrending">
 					<div className="tg-widgettitle">
-						<h3>Instagram</h3>
+						<h3>Loại sách</h3>
 					</div>
 					<div className="tg-widgetcontent">
 						<ul>
 							<li>
-								<figure>
-									<img src="images/instagram/img-01.jpg" alt="image description" />
-									<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-								</figure>
-							</li>
-							<li>
-								<figure>
-									<img src="images/instagram/img-02.jpg" alt="image description" />
-									<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-								</figure>
-							</li>
-							<li>
-								<figure>
-									<img src="images/instagram/img-03.jpg" alt="image description" />
-									<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-								</figure>
-							</li>
-							<li>
-								<figure>
-									<img src="images/instagram/img-04.jpg" alt="image description" />
-									<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-								</figure>
-							</li>
-							<li>
-								<figure>
-									<img src="images/instagram/img-05.jpg" alt="image description" />
-									<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-								</figure>
-							</li>
-							<li>
-								<figure>
-									<img src="images/instagram/img-06.jpg" alt="image description" />
-									<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-								</figure>
-							</li>
-							<li>
-								<figure>
-									<img src="images/instagram/img-07.jpg" alt="image description" />
-									<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-								</figure>
-							</li>
-							<li>
-								<figure>
-									<img src="images/instagram/img-08.jpg" alt="image description" />
-									<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-								</figure>
-							</li>
-							<li>
-								<figure>
-									<img src="images/instagram/img-09.jpg" alt="image description" />
-									<figcaption><a href="javascript:void(0);"><i className="icon-heart"></i><em>50,134</em></a></figcaption>
-								</figure>
-							</li>
-						</ul>
-					</div>
-				</div>
-				<div className="tg-widget tg-widgetblogers">
-					<div className="tg-widgettitle">
-						<h3>Top Bloogers</h3>
-					</div>
-					<div className="tg-widgetcontent">
-						<ul>
-							<li>
-								<div className="tg-author">
-									<figure><a href="javascript:void(0);"><img src="images/author/imag-03.jpg" alt="image description" /></a></figure>
-									<div className="tg-authorcontent">
-										<h2><a href="javascript:void(0);">Jude Morphew</a></h2>
-										<span>21,658 Published Books</span>
-									</div>
+								<div className="price">
+									<input type="checkbox" ></input>
+									<a>Sách in</a>
 								</div>
 							</li>
 							<li>
-								<div className="tg-author">
-									<figure><a href="javascript:void(0);"><img src="images/author/imag-04.jpg" alt="image description" /></a></figure>
-									<div className="tg-authorcontent">
-										<h2><a href="javascript:void(0);">Jude Morphew</a></h2>
-										<span>21,658 Published Books</span>
-									</div>
+								<div className="price">
+									<input type="checkbox" ></input>
+									<a>E-book</a>
 								</div>
 							</li>
 							<li>
-								<div className="tg-author">
-									<figure><a href="javascript:void(0);"><img src="images/author/imag-05.jpg" alt="image description" /></a></figure>
-									<div className="tg-authorcontent">
-										<h2><a href="javascript:void(0);">Jude Morphew</a></h2>
-										<span>21,658 Published Books</span>
-									</div>
-								</div>
-							</li>
-							<li>
-								<div className="tg-author">
-									<figure><a href="javascript:void(0);"><img src="images/author/imag-06.jpg" alt="image description" /></a></figure>
-									<div className="tg-authorcontent">
-										<h2><a href="javascript:void(0);">Jude Morphew</a></h2>
-										<span>21,658 Published Books</span>
-									</div>
+								<div className="price">
+									<input type="checkbox" onClick={() => bookTypeClickHandler()}></input>
+									<a>Combo</a>
 								</div>
 							</li>
 						</ul>
@@ -353,43 +362,11 @@ export default function SidebarCategories(props) {
 			<div id="tg-content" class="tg-content">
 				<div class="tg-products">
 					<div class="tg-sectionhead">
-						<h2><span>People’s Choice</span>Lọc theo thể loại</h2>
-					</div>
-					<div class="tg-featurebook alert" role="alert">
-						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-							<span aria-hidden="true">×</span>
-						</button>
-						<div class="tg-featureditm">
-							<div class="row">
-								<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 hidden-sm hidden-xs">
-									<figure><img src="images/img-04.png" alt="image description" /></figure>
-								</div>
-								<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
-									<div class="tg-featureditmcontent">
-										<div class="tg-themetagbox"><span class="tg-themetag">featured</span></div>
-										<div class="tg-booktitle">
-											<h3><a href="javascript:void(0);">Things To Know About Green Flat Design</a></h3>
-										</div>
-										<span class="tg-bookwriter">By: <a href="javascript:void(0);">Farrah Whisenhunt</a></span>
-										<span class="tg-stars"><span></span></span>
-										<div class="tg-priceandbtn">
-											<span class="tg-bookprice">
-												<ins>$23.18</ins>
-												<del>$30.20</del>
-											</span>
-											<a class="tg-btn tg-btnstyletwo tg-active" href="javascript:void(0);">
-												<i class="fa fa-shopping-basket"></i>
-												<em>Add To Basket</em>
-											</a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
+						<h2><span>Bạn vừa chọn</span>Lọc theo thể loại</h2>
 					</div>
 					<div class="tg-productgrid">
 						<div class="tg-refinesearch">
-							<span>showing 1 to 8 of 20 total</span>
+							<span>Hiển thị 9 sản phẩm mỗi trang</span>
 							<form class="tg-formtheme tg-formsortshoitems">
 								<fieldset>
 									<div class="form-group">
@@ -403,7 +380,7 @@ export default function SidebarCategories(props) {
 											</select>
 										</span>
 									</div>
-									<div class="form-group">
+									{/* <div class="form-group">
 										<label>show:</label>
 										<span class="tg-select">
 											<select>
@@ -412,20 +389,20 @@ export default function SidebarCategories(props) {
 												<option>20</option>
 											</select>
 										</span>
-									</div>
+									</div> */}
 								</fieldset>
 							</form>
 						</div>
-						{bookItems}
+						{bookItems.length > 0 ? bookItems : comboItems}
 
 					</div>
 					<ReactPaginate
-						nextLabel="next >"
+						nextLabel="Sau >"
 						onPageChange={handlePageClick}
 						pageCount={totalPages}
 						pageRangeDisplayed={3}
 						marginPagesDisplayed={2}
-						previousLabel="< previous"
+						previousLabel="< Trước"
 						pageClassName="page-item"
 						pageLinkClassName="page-link"
 						previousClassName="page-item"
