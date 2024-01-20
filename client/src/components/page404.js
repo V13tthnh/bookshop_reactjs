@@ -15,7 +15,6 @@ export default function Page404NotFound() {
         </div>
     </div>
         <main id="tg-main" className="tg-main tg-haslayout">
-
             <div className="tg-sectionspace tg-haslayout">
                 <div className="container">
                     <div className="row">

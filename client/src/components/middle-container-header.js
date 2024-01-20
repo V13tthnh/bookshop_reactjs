@@ -3,19 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
 import { deleteAll } from "../reducers/cartSlice";
 import Swal from 'sweetalert2';
+import SearchBar from "./search-bar";
 
 export default function MiddleContainerHeader() {
 	const dispatch = useDispatch();
 	const cartItems = useSelector(state => state.cart.carts);
-	const [wishListCount, setWishListCount] = useState(0);
+	const wishListItems = useSelector(state => state.wishList.wishListItem);
 	const token = useSelector(state => state.auth.token);
-
-	useEffect(() => {
-		var wishListItems = localStorage.getItem('wishlist');
-		if (wishListItems !== null) {
-			setWishListCount(JSON.parse(wishListItems).length);
-		}
-	}, []);
+	const customerData = useSelector(state => state.customer.customerData);
 
 	const clearCartHandler = () => {
 		Swal.fire({
@@ -30,19 +25,19 @@ export default function MiddleContainerHeader() {
 		}).then((result) => {
 			if (result.isConfirmed) {
 				dispatch(deleteAll());
-				Swal.fire({title: "Xóa thành công!",text: "Sản phẩm đã được xóa khỏi giỏ hàng.",icon: "success"});
+				Swal.fire({ title: "Xóa thành công!", text: "Sản phẩm đã được xóa khỏi giỏ hàng.", icon: "success" });
 			}
 		});
 	}
 
 	const renderIconUser = () => {
-		if(token !== null){
-			return(<><div className="dropdown tg-themedropdown tg-miniuserdropdown">
-			<NavLink to={'/account'} id="tg-miniuser" className="tg-btnthemedropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				<span className="tg-themebadge"></span>
-				<i className="icon-user"></i>
-			</NavLink>
-		</div></>);
+		if (token !== null) {
+			return (<><div className="dropdown tg-themedropdown tg-miniuserdropdown">
+				<NavLink to={'/account'} id="tg-miniuser" className="tg-btnthemedropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					<span className="tg-themebadge"></span>
+					<i className="icon-user"></i>
+				</NavLink>
+			</div></>);
 		}
 	}
 
@@ -113,13 +108,13 @@ export default function MiddleContainerHeader() {
 							<div className="dropdown tg-themedropdown tg-wishlistdropdown">
 								<NavLink to="/wishlist">
 									<a href="javascript:void(0);" id="tg-wishlisst" className="tg-btnthemedropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<span className="tg-themebadge">{wishListCount}</span>
+										<span className="tg-themebadge">{wishListItems.length}</span>
 										<i className="icon-heart"></i>
 										<span></span>
 									</a>
 								</NavLink>
 								<div className="dropdown-menu tg-themedropdownmenu" aria-labelledby="tg-wishlisst">
-									<div className="tg-description"><p>No products were added to the wishlist!</p></div>
+									<div className="tg-description"><p>Không có sản phẩm nào trong wishlist!</p></div>
 								</div>
 							</div>
 							<div className="dropdown tg-themedropdown tg-minicartdropdown">
@@ -131,16 +126,8 @@ export default function MiddleContainerHeader() {
 								{cartUI()}
 							</div>
 							{renderIconUser()}
-							
 						</div>
-						<div className="tg-searchbox">
-							<form className="tg-formtheme tg-formsearch">
-								<fieldset>
-									<input type="text" name="search" className="typeahead form-control" placeholder="Search by title, author, keyword, ISBN..." />
-									<button type="submit"><i className="icon-magnifier"></i></button>
-								</fieldset>
-							</form>
-						</div>
+						<SearchBar />
 					</div>
 				</div>
 			</div>

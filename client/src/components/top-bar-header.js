@@ -1,43 +1,43 @@
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
-import { logout, setUser } from "../reducers/authSlice";
-import { getStoredState } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { logout, logoutHandler, setUser } from "../reducers/authSlice";
+import { deleteAll } from "../reducers/cartSlice";
+import { deleteAllWishList } from "../reducers/wishListSlice";
+import { deleteCustomer } from "../reducers/customerSlice";
+import { deleteOrders } from "../reducers/orderSlice";
 
 export default function TopBarHeader() {
-    const userData = useSelector(state => state.auth.userData);
-    const token = useSelector(state => state.auth.token);
-    const isLogin = useSelector(state => state.auth.isLoggedIn);
+    const customerData = useSelector(state => state.customer.customerData);
+    const token = useSelector(state => state.auth.token)
     const dispatch = useDispatch();
 
-    const logoutHandler = () => {
-        dispatch(logout());
+    const handleLogout = () => {
+        dispatch(deleteCustomer());
+        dispatch(logout()); 
     }
 
     const render = () => {
-        if (isLogin) {
-            return (
-                <div className="tg-userlogin" >
-                    <figure>
-                        <NavLink to="/account"><img src="assets_2/images/users/user01.jpg" alt="image description" /></NavLink>
-                    </figure>
-                    <li><a href="" className="dangxuat" onClick={logoutHandler}>Đăng xuất</a></li>
-                </div>
-            );
+        if (token !== null) {
+            return (<li>
+                <a href="javascript:void(0);" onClick={handleLogout}>
+                    <i className="fa fa-sign-out" aria-hidden="true"></i>
+                    <em>Đăng xuất</em>
+                </a>
+            </li>);
         }
         else {
-            return (
-                <>
-                    <NavLink to="/login" type="button" className="btn btn-primary" >
-                        Đăng Nhập
+            return (<><li>
+                <NavLink to="/login">
+                    <i className="icon-envelope"></i>
+                    <em> Đăng Nhập</em>
+                </NavLink>
+            </li>
+                <li>
+                    <NavLink to='/register'>
+                        <i className="icon-location"></i>
+                        <em>Đăng ký</em>
                     </NavLink>
-                    <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#register">
-                        Đăng ký
-                    </button>
-                </>
-            );
+                </li> </>);
         }
     }
     return (<>
@@ -58,11 +58,8 @@ export default function TopBarHeader() {
                                     <em>Cứu</em>
                                 </a>
                             </li>
-                        </ul>
-
-                        <div className="tg-userlogin">
                             {render()}
-                        </div>
+                        </ul>
                     </div>
                 </div>
             </div>

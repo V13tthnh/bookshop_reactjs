@@ -8,29 +8,29 @@ export default function Footer(){
                             <li className="tg-devlivery">
                                 <span className="tg-clientserviceicon"><i className="icon-rocket"></i></span>
                                 <div className="tg-titlesubtitle">
-                                    <h3>Fast Delivery</h3>
-                                    <p>Shipping Worldwide</p>
+                                    <h3>Giao hàng nhanh</h3>
+                                    <p>Ship toàn quốc</p>
                                 </div>
                             </li>
                             <li className="tg-discount">
                                 <span className="tg-clientserviceicon"><i className="icon-tag"></i></span>
                                 <div className="tg-titlesubtitle">
-                                    <h3>Open Discount</h3>
-                                    <p>Offering Open Discount</p>
+                                    <h3>Giảm giá</h3>
+                                    <p>Giảm cực sốc</p>
                                 </div>
                             </li>
                             <li className="tg-quality">
                                 <span className="tg-clientserviceicon"><i className="icon-leaf"></i></span>
                                 <div className="tg-titlesubtitle">
-                                    <h3>Eyes On Quality</h3>
-                                    <p>Publishing Quality Work</p>
+                                    <h3>Chất lượng</h3>
+                                    <p>Sách ngon</p>
                                 </div>
                             </li>
                             <li className="tg-support">
                                 <span className="tg-clientserviceicon"><i className="icon-heart"></i></span>
                                 <div className="tg-titlesubtitle">
-                                    <h3>24/7 Support</h3>
-                                    <p>Serving Every Moments</p>
+                                    <h3>Hỗ trợ 24/7</h3>
+                                    <p>Phục vụ mọi lúc</p>
                                 </div>
                             </li>
                         </ul>
@@ -38,7 +38,7 @@ export default function Footer(){
                     <div className="tg-threecolumns">
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
                             <div className="tg-footercol">
-                                <strong className="tg-logo"><a href="javascript:void(0);"><img src="images/flogo.png" alt="image description"/></a></strong>
+                                <strong className="tg-logo"><a href="javascript:void(0);"><img src="./assets_2/images/logo.png" alt="image description"/></a></strong>
                                 <ul className="tg-contactinfo">
                                     <li>
                                         <i className="icon-apartment"></i>
@@ -53,13 +53,13 @@ export default function Footer(){
                                     </li>
                                     <li>
                                         <i className="icon-clock"></i>
-                                        <span>Serving 7 Days A Week From 9am - 5pm</span>
+                                        <span>Phục vụ 7 ngày trong tuần từ 9h - 17h</span>
                                     </li>
                                     <li>
                                         <i className="icon-envelope"></i>
                                         <span>
-                                            <em><a href="mailto:support@domain.com">support@domain.com</a></em>
-                                            <em><a href="mailto:info@domain.com">info@domain.com</a></em>
+                                            <em><a href="mailto:support@domain.com">bookshop@domain.com</a></em>
+                                            <em><a href="mailto:info@domain.com">bookshop@domain.com</a></em>
                                         </span>
                                     </li>
                                 </ul>
@@ -75,25 +75,25 @@ export default function Footer(){
                         <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4">
                             <div className="tg-footercol tg-widget tg-widgetnavigation">
                                 <div className="tg-widgettitle">
-                                    <h3>Shipping And Help Information</h3>
+                                    <h3>Dịch vụ &amp; hỗ trợ</h3>
                                 </div>
                                 <div className="tg-widgetcontent">
                                     <ul>
-                                        <li><a href="javascript:void(0);">Terms of Use</a></li>
-                                        <li><a href="javascript:void(0);">Terms of Sale</a></li>
-                                        <li><a href="javascript:void(0);">Returns</a></li>
-                                        <li><a href="javascript:void(0);">Privacy</a></li>
-                                        <li><a href="javascript:void(0);">Cookies</a></li>
-                                        <li><a href="javascript:void(0);">Contact Us</a></li>
-                                        <li><a href="javascript:void(0);">Our Affiliates</a></li>
-                                        <li><a href="javascript:void(0);">Vision &amp; Aim</a></li>
+                                        <li><a href="javascript:void(0);">Điều khoản sử dụng</a></li>
+                                        <li><a href="javascript:void(0);">Chính sách bảo mật thông tin cá nhân</a></li>
+                                        <li><a href="javascript:void(0);">Chính sách bảo mật thanh toán</a></li>
+                                        <li><a href="javascript:void(0);">Chính sách đổi - trả - hoàn tiền</a></li>
+                                        <li><a href="javascript:void(0);">Chính sách bảo hành - bồi hoàn</a></li>
+                                        <li><a href="javascript:void(0);">Chính sách vận chuyển</a></li>
+                                        <li><a href="javascript:void(0);">Chính sách khách hàng</a></li>
+                                        <li><a href="javascript:void(0);">Phương thức thanh toán &amp; xuất hóa đơn</a></li>
                                     </ul>
                                     <ul>
-                                        <li><a href="javascript:void(0);">Our Story</a></li>
-                                        <li><a href="javascript:void(0);">Meet Our Team</a></li>
+                                        <li><a href="javascript:void(0);">Giới thiệu</a></li>
+                                        <li><a href="javascript:void(0);">Liên hệ</a></li>
                                         <li><a href="javascript:void(0);">FAQ</a></li>
-                                        <li><a href="javascript:void(0);">Testimonials</a></li>
-                                        <li><a href="javascript:void(0);">Join Our Team</a></li>
+                                        <li><a href="javascript:void(0);">Tin tức tuyển dụng</a></li>
+                                        <li><a href="javascript:void(0);">Tham gia cùng chúng tôi</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -101,26 +101,26 @@ export default function Footer(){
                         <div className="col-xs-12 col-sm-12 col-md-4 col-lg-4">
                             <div className="tg-footercol tg-widget tg-widgettopsellingauthors">
                                 <div className="tg-widgettitle">
-                                    <h3>Top Selling Authors</h3>
+                                    <h3>Tác giả có sách bán chạy nhất</h3>
                                 </div>
                                 <div className="tg-widgetcontent">
                                     <ul>
                                         <li>
-                                            <figure><a href="javascript:void(0);"><img src="images/author/imag-09.jpg" alt="image description"/></a></figure>
+                                            <figure><a href="javascript:void(0);"><img src="./assets_2/images/author/imag-09.jpg" alt="image description"/></a></figure>
                                             <div className="tg-authornamebooks">
                                                 <h4><a href="javascript:void(0);">Jude Morphew</a></h4>
                                                 <p>21,658 Published Books</p>
                                             </div>
                                         </li>
                                         <li>
-                                            <figure><a href="javascript:void(0);"><img src="images/author/imag-10.jpg" alt="image description"/></a></figure>
+                                            <figure><a href="javascript:void(0);"><img src="./assets_2/images/author/imag-10.jpg" alt="image description"/></a></figure>
                                             <div className="tg-authornamebooks">
                                                 <h4><a href="javascript:void(0);">Shaun Humes</a></h4>
                                                 <p>20,257 Published Books</p>
                                             </div>
                                         </li>
                                         <li>
-                                            <figure><a href="javascript:void(0);"><img src="images/author/imag-11.jpg" alt="image description"/></a></figure>
+                                            <figure><a href="javascript:void(0);"><img src="./assets_2/images/author/imag-11.jpg" alt="image description"/></a></figure>
                                             <div className="tg-authornamebooks">
                                                 <h4><a href="javascript:void(0);">Kathrine Culbertson</a></h4>
                                                 <p>15,686 Published Books</p>
@@ -138,13 +138,13 @@ export default function Footer(){
             <div className="container">
                 <div className="row">
                     <div className="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-                        <h4>Signup Newsletter!</h4>
-                        <h5>Consectetur adipisicing elit sed do eiusmod tempor incididunt.</h5>
+                        <h4>Đăng ký nhận bản tin!</h4>
+                        <h5>Đăng ký để cập nhật những thông tin sản phẩm mới nhất.</h5>
                     </div>
                     <div className="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                         <form className="tg-formtheme tg-formnewsletter">
                             <fieldset>
-                                <input type="email" name="email" className="form-control" placeholder="Enter Your Email ID"/>
+                                <input type="email" name="email" className="form-control" placeholder="Nhập email của bạn"/>
                                     <button type="button"><i className="icon-envelope"></i></button>
                             </fieldset>
                         </form>
@@ -157,7 +157,7 @@ export default function Footer(){
             <div className="container">
                 <div className="row">
                     <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                        <span className="tg-paymenttype"><img src="images/paymenticon.png" alt="image description"/></span>
+                        <span className="tg-paymenttype"><img src="./assets_2/images/paymenticon.png" alt="image description"/></span>
                         <span className="tg-copyright">2017 All Rights Reserved By &copy; Book Library</span>
                     </div>
                 </div>

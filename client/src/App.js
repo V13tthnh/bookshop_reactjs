@@ -1,6 +1,4 @@
 //import "./App.css";
-// import "./assets_2/css/main.css";
-import 'jquery/src/jquery';
 import React from "react";
 import { Routes, Route } from 'react-router-dom';
 import Page404 from "./pages/Page404.js";
@@ -13,6 +11,14 @@ import ProductPage from './pages/ProductPage.js';
 import AccountPage from './pages/AccountPage.js';
 import HomePage from './pages/HomePage.js';
 import LoginPage from './pages/LoginPage.js';
+import ListOrderPage from "./pages/ListOrderPage.js";
+import RegisterPage from "./pages/RegisterPage.js";
+import ComboDetailPage from "./pages/ComboDetailPage.js";
+import CategoryProductPage from "./pages/CategoryProductPage.js";
+import OrderDetailPage from "./pages/OrderDetailPage.js";
+import GoogleCallback from "./pages/GoogleCallback.js";
+import VnPayCallback from "./pages/VnPayCallBack.js";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.js";
 
 export default function App() {
   return (
@@ -20,13 +26,21 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />}></Route>
           <Route path="/login" element={<LoginPage />}></Route>
-          <Route path="/product" element={<ProductPage />}></Route>
+          <Route path="/forgot-password" element={<ForgotPasswordPage />}></Route>
+          <Route path="/auth/google/callback" element={<GoogleCallback />}></Route>
+          <Route path="/register" element={<RegisterPage />}></Route>
+          <Route path="/product" element={<ProductPage/>}></Route>
           <Route path="/product/detail/:id" element={<DetailPage />}></Route>
+          <Route path="/product/category/:id" element={<CategoryProductPage />}></Route>
+          <Route path="/combo/detail/:id" element={<ComboDetailPage />}></Route>
           <Route path="/contact-us" element={<ContactPage />}></Route>
           <Route path="/cart" element={<CartPage />}></Route>
           <Route path="/checkout" element={<CheckoutPage />}></Route>
           <Route path='/wishlist' element={<WishListPage />}></Route>
           <Route path="/account" element={<AccountPage />}></Route>
+          <Route path="/orders" element={<ListOrderPage />}></Route>
+          <Route path="/vnp/callback" element={<VnPayCallback />}></Route>
+          <Route path="/order/detail" element={<OrderDetailPage />}></Route>
           <Route path="/not-found" element={<Page404 />}></Route>
         </Routes>
     </>

@@ -9,7 +9,7 @@ export default function ProductList(props) {
     const [listCategories, setListCategories] = useState([]);
     useEffect(() => {
         axios('http://127.0.0.1:8000/api/category')
-            .then(reponse => reponse.data)
+            .then(response => response.data)
             .then(json => setListCategories(json.data))
             .catch((error) => {
                 console.log(error)
@@ -25,19 +25,12 @@ export default function ProductList(props) {
                         <div id="tg-twocolumns" className="tg-twocolumns">
                             <div className="col-xs-12 col-sm-8 col-md-8 col-lg-9 pull-right">
                                 <div id="tg-content" className="tg-content">
-                                    <div className="tg-products">
-                                        {/* <div className="tg-sectionhead">
-                                            <h2><span>People’s Choice</span>Bestselling Books</h2>
-                                        </div> */}
-                                        {/* <SmallBanner /> */}
-                                        {/* <div className="tg-productgrid">
-                                            <BookSort />    
-                                        </div> */}
-                                        <BooksList data={props.data} />
+                                    <div className="tg-products">         
+                                        {/* <BooksList data={props.data} /> */}
                                     </div>
                                 </div>
                             </div>
-                            <SidebarCategories data={listCategories} itemsPerPage={4} />
+                            <SidebarCategories data={listCategories} />
                         </div>
                     </div>
                 </div>
