@@ -18,15 +18,10 @@ export default function ProductPage() {
                 console.log(error)
             })
     }, []);
-
-    //console.log(productList);
-
+        
     return (<>
         <Header />
         <ProductList data={productList} />
-        <LoginForm />
-        <RegisterForm />
-        <ForgotPasswordForm />
         <Footer />
     </>)
 }

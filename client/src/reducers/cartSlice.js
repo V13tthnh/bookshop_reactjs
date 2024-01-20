@@ -11,14 +11,25 @@ export const cartSlice = createSlice({
     add: (state, action) => {
       const newItem = action.payload;
       if (state.carts.length === 0) {
-        state.carts.push({
-          id: newItem.id,
-          name: newItem.name,
-          quantity: 1,
-          unit_price: newItem.unit_price,
-          image: newItem.images[0]?.front_cover,
-          isCombo: false
-        });
+        if (newItem.discounts?.[0]?.percent) {
+          state.carts.push({
+            id: newItem.id,
+            name: newItem.name,
+            quantity: 1,
+            unit_price: newItem.unit_price - (newItem.unit_price * newItem.discounts[0]?.percent) / 100,
+            image: newItem.images?.[0]?.front_cover,
+            isCombo: false
+          });
+        } else {
+          state.carts.push({
+            id: newItem.id,
+            name: newItem.name,
+            quantity: 1,
+            unit_price: newItem.unit_price,
+            image: newItem.images?.[0]?.front_cover,
+            isCombo: false
+          });
+        }
       } else {
         let check = false;
         state.carts.map((item, key) => {
@@ -28,14 +39,25 @@ export const cartSlice = createSlice({
           }
         })
         if (!check) {
-          state.carts.push({
-            id: newItem.id,
-            name: newItem.name,
-            quantity: 1,
-            unit_price: newItem.unit_price,
-            image: newItem.images[0]?.front_cover,
-            isCombo: false
-          });
+          if (newItem.discounts?.[0]?.percent) {
+            state.carts.push({
+              id: newItem.id,
+              name: newItem.name,
+              quantity: 1,
+              unit_price: newItem.unit_price - (newItem.unit_price * newItem.discounts[0]?.percent) / 100,
+              image: newItem.images?.[0]?.front_cover,
+              isCombo: false
+            });
+          } else {
+            state.carts.push({
+              id: newItem.id,
+              name: newItem.name,
+              quantity: 1,
+              unit_price: newItem.unit_price,
+              image: newItem.images?.[0]?.front_cover,
+              isCombo: false
+            });
+          }
         }
       }
     },

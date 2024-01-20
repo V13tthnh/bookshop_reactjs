@@ -21,8 +21,24 @@ export const loginHandler = createAsyncThunk('auth/loginUser', async (credential
     });
     const userData = userDataResponse.data;
     return { access_token, userData };
+   
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error.response.data.errors);
+  }
+});
+
+export const logoutHandler = createAsyncThunk('auth/logoutHandler', async (credentials, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(`http://127.0.0.1:8000/api/logout`, {
+      headers: {
+        'Authorization': `Bearer ${credentials}` ,
+        'Accept': 'application/json',
+      }
+    });
+    return response;
+   
+  } catch (error) {
+    return rejectWithValue(error.response.data.errors);
   }
 });
 
@@ -33,8 +49,11 @@ export const authSlice = createSlice({
     setLoading: (state) => {
       state.loading = true;
     },
-    setError: (state, action) => {
-      state.error = action.payload;
+    setToken: (state, action) => {
+      state.token = action.payload;
+    },
+    setError: (state) => {
+      state.error = false;
       state.loading = false;
     },
     logout: (state) => {
@@ -46,21 +65,31 @@ export const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
     .addCase(loginHandler.pending, (state) => {
-      state.loading = true;
+      state.loading = false;
     })
     .addCase(loginHandler.fulfilled, (state, action) => {
-      state.loading = false;
       state.token = action.payload.access_token;
       state.userData = action.payload.userData;
       state.isLoggedIn = true;
     })
     .addCase(loginHandler.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload || 'An error occurred during login';
+      state.error = action.payload || true;
+    })
+    .addCase(logoutHandler.pending, (state) => {
+      state.loading = false;
+    })
+    .addCase(logoutHandler.fulfilled, (state, action) => {
+      state.token = null;
+      state.isLoggedIn = false;
+    })
+    .addCase(logoutHandler.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload || true;
     })
   },
 })
 
-export const {setUser, setLoading, setError, logout} = authSlice.actions
+export const {setUser, setToken, setLoading, setError, logout} = authSlice.actions
 
 export default authSlice.reducer

@@ -1011,11 +1011,13 @@ body.tg-comingsoonpage .tg-wrapper{overflow:visible;}
 	height: 100%;
 	padding: 0 300px;
 	position: absolute;
+	
 }
 .tg-formsearch fieldset{
 	margin: 0 0 6px;
 	border-radius: 4px;
 	border: 1px solid #dbdbdb;
+	
 }
 .tg-formsearch fieldset .form-control{
 	border: 0;
@@ -1024,6 +1026,7 @@ body.tg-comingsoonpage .tg-wrapper{overflow:visible;}
 	line-height: 24px;
 	position: relative;
 	padding: 10px 54px 10px 20px;
+	
 }
 .tg-formsearch fieldset button{
 	top: 0;
@@ -1035,6 +1038,7 @@ body.tg-comingsoonpage .tg-wrapper{overflow:visible;}
 	line-height: 44px;
 	background: none;
 	position: absolute;
+	backdrop-filter: none;
 }
 .tg-formsearch a{
 	float: right;

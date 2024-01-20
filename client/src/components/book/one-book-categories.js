@@ -1,6 +1,12 @@
 export default function OneBookCategories(props) {
-    return (<>   <ul className="tg-bookscategories">
-        <li><a href="javascript:void(0);">Adventure</a></li>
-        <li><a href="javascript:void(0);">Fun</a></li>
-    </ul></>)
+    console.log(props.data);
+    return (
+    <ul className="tg-bookscategories">
+        {props.data?.map((item, index) => {
+        return (<>
+            {item.name}
+            {index === props.data?.length - 1 ? null : " & "}
+        </>);
+    })}
+    </ul>);
 }

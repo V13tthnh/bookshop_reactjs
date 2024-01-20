@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { NavLink, useNavigate } from "react-router-dom";
+import { deleteCustomer, getCustomerData } from "../../reducers/customerSlice";
+import { logout } from "../../reducers/authSlice";
 
 export default function Profile() {
+    const dispatch = useDispatch();
     const navigation = useNavigate();
-    const userData = useSelector(state => state.auth.userData);
-    const token = useSelector(state => state.auth.token);
+
+    var token = useSelector(state => state.auth.token);
+    const customer = useSelector(state => state.customer.customerData);
+
     const [orderData, setOrderData] = useState([]);
     const [isChecked, setIsChecked] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -28,12 +33,21 @@ export default function Profile() {
 
     useEffect(() => {
         if (token === null) {
-            navigation('/not-found');
-            Swal.fire({ title: "Rấc tiếc!", text: "Bạn cần đăng nhập để thực hiện chức năng này!", icon: "danger" });
+            navigation('/login');
+            Swal.fire({ title: "Rấc tiếc!", text: "Bạn cần đăng nhập để thực hiện chức năng này!", icon: "error" });
         }
-    }, []);
+        dispatch(getCustomerData(token));
+    }, [token]);
 
-    console.log(token);
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        // Kiểm tra định dạng file
+        if (file && (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpeg')) {
+            setSelectedFile(file);
+        } else {
+            Swal.fire({ title: "Lỗi file!", text: "Chỉ chấp nhận file có đuôi jpg, png, jpeg", icon: "error" });
+        }
+    }
 
     const updateInfo = () => {
         const formData = new FormData();
@@ -41,30 +55,23 @@ export default function Profile() {
         formData.append('address', input_address.current.value)
         formData.append('email', input_email.current.value)
         formData.append('phone', input_phone.current.value)
-        // var request = {
-        //     "name": input_name.current.value,
-        //     "address": input_address.current.value,
-        //     "email": input_email.current.value,
-        //     "phone": input_phone.current.value
-        // }
         if (isChecked) {
             if (input_confirmPassword.current.value == input_newPassword.current.value && input_newPassword.current.value !== '') {
                 formData.append('password', input_newPassword.current.value);
-                //request = { ...request, "password": input_newPassword.current.value };
+                formData.append('oldPassword', input_password.current.value);
+                setIsChecked(false);
             } else {
                 Swal.fire({ title: "Mật khẩu xác nhận không đúng!", text: "Vui lòng xem lại mật khẩu mới và mật khẩu xác nhận!", icon: "error" });
                 return;
             }
         }
         if (selectedFile !== null) {
-            formData.append('image', selectedFile.name)
-            //request = { ...request, "image": selectedFile.name };
+            formData.append('image', selectedFile)
         }
-
         axios.request({
             method: 'post',
             maxBodyLength: Infinity,
-            url: `http://127.0.0.1:8000/api/update-info/${userData.id}`,
+            url: `http://127.0.0.1:8000/api/update-info/${customer.id}`,
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'multipart/form-data',
@@ -72,9 +79,26 @@ export default function Profile() {
             },
             data: formData
         }).then(response => {
-            Swal.fire({ title: "Cập nhật thành công!", text: response.data.message, icon: "success" });
+            if (response.data.success) {
+                Swal.fire({ title: "Cập nhật thành công!", text: response.data.message, icon: "success" });
+                dispatch(getCustomerData(token)); 
+                setNameErrors([]);
+                setEmailErrors([]);
+                setAddressErrors([]);
+                setImageErrors([]);
+                setPhoneErrors([]);
+                setPasswordErrors([]);
+            } else {
+                Swal.fire({ title: "Mật khẩu cũ không trùng khớp!", text: response.data.message, icon: "error" });
+            }
         }).catch((error) => {
-            if (error.response) {
+            //Kiểm tra hết phiên đăng nhập
+            if(error.response.statusText === 'Unauthorized'){
+                dispatch(deleteCustomer()); //Xóa dữ liệu khách hàng hiện tại
+                dispatch(logout());
+                Swal.fire({ title: "Phiên đăng nhập của bạn đã hết hạn!", text: "Vui lòng đăng nhập lại!", icon: "error" });
+                navigation('/login');
+            }else if (error.response) {
                 setNameErrors(error.response.data.errors.name);
                 setEmailErrors(error.response.data.errors.email);
                 setAddressErrors(error.response.data.errors.address);
@@ -125,32 +149,6 @@ export default function Profile() {
         </>);
     }
 
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        // Kiểm tra định dạng file
-        if (file && (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpeg')) {
-            setSelectedFile(file);
-        } else {
-            Swal.fire({ title: "Lỗi file!", text: "Chỉ chấp nhận file có đuôi jpg, png, jpeg", icon: "error" });
-        }
-    }
-
-    const fetchOrderData = () => {
-        if (orderData !== undefined) {
-            orderData.map(item => {
-                return (<li className="list-group-item d-flex justify-content-between align-items-center p-3">
-                    {item.name}
-                </li>);
-            });
-        }
-        else {
-            return (<li className="list-group-item d-flex justify-content-between align-items-center p-3">
-                Hiện không có đơn hàng nào
-            </li>)
-        }
-    }
-
     return (<><section >
         <div className="container py-5 mb-3">
             <div className="row">
@@ -164,15 +162,13 @@ export default function Profile() {
                     </div>
                 </div>
             </div>
-
             <div className="row">
                 <div className="col-lg-4">
                     <div className="card mb-4">
                         <div className="card-body text-center">
-                            <img src="./assets_2/images/users/user01.jpg" alt="avatar"
-                                className="rounded-circle img-fluid" style={{ width: '150px' }} />
-                            <h5 className="my-3" style={{ fontWeight: 'bold' }}>{userData.name}</h5>
-                            <p className="text-muted mb-1">{userData.email}</p>
+                            <img src={`http://localhost:8000/` + customer?.image} alt="avatar"
+                                className="rounded-circle img-fluid" style={{ width: '150px', height: '150px' }} />
+                            <h5 className="my-3" style={{ fontWeight: 'bold' }}>Ảnh đại diện</h5>
                             <div className="form-group row">
                                 <div class="text-danger"><ul>{imageErrors !== undefined ? imageErrors.map(item => <li>{item}</li>) : ''}</ul></div>
                                 <div className="fileinput fileinput-new input-group " data-provides="fileinput">
@@ -187,7 +183,7 @@ export default function Profile() {
                                     </button>
                                     <a href="#" className="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
                                 </div>
-
+                                <NavLink to='/orders'>Hóa đơn của bạn</NavLink>
                             </div>
                         </div>
                     </div>
@@ -201,7 +197,7 @@ export default function Profile() {
                                 </div>
                                 <div className="col-sm-9">
                                     <div className="form-group">
-                                        <input type="text" className="form-control" defaultValue={userData.name} ref={input_name} />
+                                        <input type="text" className="form-control" defaultValue={customer?.name} ref={input_name} />
                                     </div>
                                     <div className="text-danger"><ul>{nameErrors !== undefined ? nameErrors.map(item => <li>{item}</li>) : ''}</ul></div>
                                 </div>
@@ -213,7 +209,7 @@ export default function Profile() {
                                 </div>
                                 <div className="col-sm-9">
                                     <div className="form-group">
-                                        <input type="email" className="form-control" defaultValue={userData.email} ref={input_email} />
+                                        <input type="email" className="form-control" defaultValue={customer?.email} ref={input_email} />
                                     </div>
                                     <div className="text-danger"><ul>{emailErrors !== undefined ? emailErrors.map(item => <li>{item}</li>) : ''}</ul></div>
                                 </div>
@@ -225,7 +221,7 @@ export default function Profile() {
                                 </div>
                                 <div className="col-sm-9">
                                     <div className="form-group">
-                                        <input type="text" className="form-control" defaultValue={userData.phone} ref={input_phone} />
+                                        <input type="text" className="form-control" defaultValue={customer?.phone} ref={input_phone} />
                                     </div>
                                     <div className="text-danger"><ul>{phoneErrors !== undefined ? phoneErrors.map(item => <li>{item}</li>) : ''}</ul></div>
                                 </div>
@@ -237,7 +233,7 @@ export default function Profile() {
                                 </div>
                                 <div className="col-sm-9">
                                     <div className="form-group">
-                                        <input type="text" className="form-control" defaultValue={userData.address} ref={input_address} />
+                                        <input type="text" className="form-control" defaultValue={customer?.address} ref={input_address} />
                                     </div>
                                     <div className="text-danger"><ul>{addressErrors !== undefined ? addressErrors.map(item => <li>{item}</li>) : ''}</ul></div>
                                 </div>

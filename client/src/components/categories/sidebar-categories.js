@@ -6,11 +6,13 @@ import OneBookPrice from "../book/one-book-price";
 import ReactPaginate from 'react-paginate';
 import { useDispatch, useSelector } from "react-redux";
 import { add, addCombo } from "../../reducers/cartSlice";
+import { addToWishList, addComboToWishList } from "../../reducers/wishListSlice";
 import Swal from 'sweetalert2';
 
 export default function SidebarCategories(props) {
 	const dispatch = useDispatch();
 	const cartItems = useSelector((state) => state.cart.carts);
+	const wishLists = useSelector((state) => state.wishList.wishListItem);
 	// Lấy tất cả các ô checkbox và thêm sự kiện change để thực hiện hàm tick
 	let boxes = document.querySelectorAll("input[type=checkbox]");
 	boxes.forEach(b => b.addEventListener("change", tick));
@@ -30,7 +32,7 @@ export default function SidebarCategories(props) {
 	const [totalPages, setTotalPages] = useState(0);
 	const [newPage, setNewPage] = useState(0);
 	const [selectedPriceRange, setSelectedPriceRange] = useState({ min: 0, max: Number.MAX_SAFE_INTEGER });
-	const [listCombo, setListCombo] = useState([]);
+	const [selectedType, setSelectedType] = useState(null); // Loại sách đang được chọn
 
 	// Khai báo state và hàm để lựa chọn thứ tự sắp xếp sách
 	const [sortOrder, setSortOrder] = useState("asc");
@@ -46,6 +48,8 @@ export default function SidebarCategories(props) {
 			sortedBooks.sort((a, b) => a.unit_price - b.unit_price);
 		} else if (value === "priceDesc") {
 			sortedBooks.sort((a, b) => b.unit_price - a.unit_price);
+		} else if (value === "ebook") {
+			sortedBooks.filter(item => item.book_type === 1);
 		}
 		setFilteredBooks(sortedBooks);
 	};
@@ -82,19 +86,23 @@ export default function SidebarCategories(props) {
 		}
 	};
 
-	const bookTypeClickHandler = async () => {
+	const bookTypeClickHandler = async (type) => {
 		setNewPage(1); // Set lại trang là 1
 		setSelectedCategory(null); // Đặt lại thể loại là rỗng
-		setFilteredBooks([]); 
-		setMinPrice(0);
-		setMaxPrice(Number.MAX_SAFE_INTEGER);
+		setMinPrice(0); // Set giá nhỏ nhất là 0
+		setMaxPrice(Number.MAX_SAFE_INTEGER); // Set giá lớn nhất
+		setSelectedType(type);
 		try {
-			const response = await axios.get(`http://127.0.0.1:8000/api/combos?page=${newPage}`);
+			const response = await axios.get(`http://127.0.0.1:8000/api/filter-books-by-type/${type}?page=${newPage}`);
 			if (response?.data) {
-				setListCombo(response.data.data || []);
-				setTotalPages(response.data.total_pages || 0);
+				if (response?.data.data[0].book_type === 0 || response?.data.data[0].book_type == 1) {
+					setFilteredBooks(response.data.data || []);
+					setTotalPages(response.data.total_pages || 0);
+				} else {
+					setFilteredBooks(Object.values(response.data.data) || []);
+					setTotalPages(response.data.total_pages || 0);
+				}
 			}
-			console.log(listCombo);
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
@@ -121,7 +129,6 @@ export default function SidebarCategories(props) {
 		const nextPage = selected + 1;
 		setNewPage(nextPage);
 	};
-
 	// useEffect hook để fetch dữ liệu sách dựa trên các thay đổi trong trạng thái
 	useEffect(() => {
 		const fetchData = async () => {
@@ -132,18 +139,25 @@ export default function SidebarCategories(props) {
 					url = `http://127.0.0.1:8000/api/filter-books/${selectedCategory}?page=${newPage}`;
 				} else if (selectedPriceRange.min !== 0 || selectedPriceRange.max !== Number.MAX_SAFE_INTEGER) {
 					url = `http://127.0.0.1:8000/api/filter-books-by-price/${selectedPriceRange.min}/${selectedPriceRange.max}?page=${newPage}`;
+				} else if (selectedType !== null) {
+					url = `http://127.0.0.1:8000/api/filter-books-by-type/${selectedType}?page=${newPage}`
 				}
 				const response = await axios.get(url);
 				if (response?.data) {
-					setFilteredBooks(response.data.data || []);
-					setTotalPages(response.data.total_pages || 0);
+					if (response?.data?.data?.[0]?.book_type !== undefined) {
+						setFilteredBooks(response.data.data || []);
+						setTotalPages(response.data.total_pages || 0);
+					} else {
+						setFilteredBooks(Object.values(response.data.data) || []);
+						setTotalPages(response.data.total_pages || 0);
+					}
 				}
 			} catch (error) {
 				console.error("Error fetching data:", error);
 			}
 		};
 		fetchData();
-	}, [selectedCategory, selectedPriceRange, newPage]);
+	}, [selectedCategory, selectedPriceRange, selectedType, newPage]);
 
 	// Tạo các phần tử thể loại sách từ danh sách thể loại
 	const categoryItems = listCategories.map(item => (
@@ -156,132 +170,116 @@ export default function SidebarCategories(props) {
 	));
 
 	// Hàm thêm sản phẩm vào wishlist 
-	const addToWishList = (id) => {
-		// Tìm sản phẩm vừa chọn theo id
+	const addWishList = (id) => {
 		const result = filteredBooks.find(item => item.id === id);
-		// Thực hiện thêm vào wishlist
-		var book = { id: result.id, name: result.name, image: result.images[0]?.front_cover };
-		var wishListItems = localStorage.getItem('wishlist');
-		if (wishListItems == null) {
-			wishListItems = [book];
+		if (result.book_type !== undefined) {
+			dispatch(addToWishList(result));
 		} else {
-			wishListItems = JSON.parse(wishListItems);
-			wishListItems.push(book);
+			dispatch(addComboToWishList(result));
 		}
-		localStorage.setItem('wishlist', JSON.stringify(wishListItems));
-		alert('Them sach vao wishlist thanh cong');
-		console.log(wishListItems);
+		Swal.fire({
+			position: "top-end",
+			icon: "success",
+			title: "Đã thêm sách vào wishlist!",
+			showConfirmButton: false,
+			timer: 1500
+		});
 	}
 
 	//Hàm thêm sản phẩm vào giỏ hàng
 	const addBookToCart = (id) => {
 		const result = filteredBooks.find(item => item.id === id);
-		dispatch(add(result));
+		if (result.book_type !== undefined) {
+			dispatch(add(result));
+		} else {
+			dispatch(addCombo(result));
+		}
 		Swal.fire({
 			position: "top-end",
 			icon: "success",
-			title: "Sách đã được thêm vào giỏ hàng!",
+			title: "Đã thêm vào giỏ hàng!",
 			showConfirmButton: false,
 			timer: 1500
 		});
 	}
 
-	const addComboToCart = (id) => {
-		const result = listCombo.find(item => item.id === id);
-		dispatch(addCombo(result));
-		Swal.fire({
-			position: "top-end",
-			icon: "success",
-			title: "Combo đã được thêm vào giỏ hàng!",
-			showConfirmButton: false,
-			timer: 1500
-		});
-	}
+	//Hiển thị số sao người dùng đánh giá
+    const renderStars = (value) => {
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            stars.push(
+                <span
+                    key={i}
+                    style={{
+                        color: i <= value ? 'gold' : 'grey',
+                        cursor: 'pointer',
+                        height: '90px'
+                    }}>★</span>
+            );
+        }
+        return stars;
+    };
 
-	// Tạo các phần tử sách từ danh sách sách đã lọc
-	const comboItems = listCombo.map(combo => (<>
-		<div class="col-xs-6 col-sm-6 col-md-4 col-lg-4">
-			<div class="tg-postbook">
-				<figure class="tg-featureimg">
-					<div className="tg-bookimg">
-						<div class="tg-frontcover"><img src={`http://localhost:8000/` + combo.image} alt="image description" /></div>
-					</div>
-					<a class="tg-btnaddtowishlist" onClick={() => addToWishList(combo.id)} href="javascript:void(0);">
-						<i class="icon-heart"></i>
-						<span>Thêm vào wishlist</span>
-					</a>
-				</figure>
-				<div class="tg-postbookcontent">
-					<div class="tg-themetagbox"><span class="tg-themetag">sale</span></div>
-					<div class="tg-booktitle">
-						<h3><NavLink to={`detail/${combo.id}`} >{combo.name}</NavLink></h3>
-					</div>
-					<span class="tg-stars"><span></span></span>
-					<OneBookPrice data={combo.price} />
-					<div className="but">
-						<a class="tg-btn tg-btnstyletwo" onClick={() => addComboToCart(combo.id)} href="javascript:void(0);">
-							<div className="btn">
-								<i class="fa fa-shopping-basket"></i>
-								<em>Thêm vào giỏ hàng</em></div>
+
+	const bookItems = () => {
+		const currentDate = new Date(); //Lấy ngày hiện tại
+		return (filteredBooks.map(book =>
+		(<>
+			<div class="col-xs-6 col-sm-6 col-md-4 col-lg-4">
+				<div class="tg-postbook">
+					<figure class="tg-featureimg">
+						<div className="tg-bookimg">
+							{book?.images?.[0]?.front_cover !== undefined ?
+								<><div class="tg-frontcover"><img loading="lazy" style={{ width: '300px', height: '270px' }} src={`http://localhost:8000/` + book.images[0].front_cover} alt="image description" /></div>
+									<div class="tg-backcover"><img loading="lazy" src={`http://localhost:8000/` + book.images[0].front_cover} alt="image description" /></div></> :
+								<><div class="tg-frontcover"><img loading="lazy" style={{ width: '300px', height: '270px' }} src={`http://localhost:8000/` + book.image} alt="image description" /></div>
+									<div class="tg-backcover"><img loading="lazy" src={`http://localhost:8000/` + book.image} alt="image description" /></div></>}
+						</div>
+						<a class="tg-btnaddtowishlist" onClick={() => addWishList(book.id)} href="javascript:void(0);">
+							<i class="icon-heart"></i>
+							<span>Thêm vào wishlist</span>
 						</a>
+					</figure>
+					<div class="tg-postbookcontent">
+						{currentDate.toISOString().split('T')[0] < book?.discounts?.[0]?.end_date ? <><div class="tg-themetagbox"><span class="tg-themetag">Giảm {book?.discounts?.[0]?.percent} %</span></div></> : ''}
+						<div class="tg-booktitle">
+							<h3>{book?.book_type === 0 || book?.book_type === 1 ? <NavLink to={`detail/${book.id}`} >{book.name}</NavLink> : <NavLink to={`/combo/detail/${book.id}`} >{book.name}</NavLink>}</h3>
+						</div>
+						{renderStars(book?.overrate)}
+						{book?.unit_price !== undefined ?
+							<><span className="tg-bookprice">
+								{currentDate.toISOString().split('T')[0] < book?.discounts?.[0]?.end_date ? <><ins>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.unit_price - (book?.discounts?.[0]?.percent * book.unit_price) / 100)}</ins>
+									<del>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.unit_price)}</del></> : <><ins>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.unit_price)}</ins></>}
+							</span></> :
+							<><span className="tg-bookprice">
+								<ins>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.price)}</ins>
+							</span></>}
+						<div className="but">
+							<a class="tg-btn tg-btnstyletwo" onClick={() => addBookToCart(book.id)} href="javascript:void(0);">
+								<div className="btn">
+									<i class="fa fa-shopping-basket"></i>
+									<em>Thêm vào giỏ hàng</em>
+								</div>
+							</a>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-	</>
-	));
-	const bookItems = filteredBooks.map(book => (<>
-		<div class="col-xs-6 col-sm-6 col-md-4 col-lg-4">
-			<div class="tg-postbook">
-				<figure class="tg-featureimg">
-					<div className="tg-bookimg">
-						<div class="tg-frontcover"><img src={`http://localhost:8000/` + book.images[0].front_cover} alt="image description" /></div>
-						<div class="tg-backcover"><img src={`http://localhost:8000/` + book.images[0].back_cover} alt="image description" /></div>
-					</div>
-					<a class="tg-btnaddtowishlist" onClick={() => addToWishList(book.id)} href="javascript:void(0);">
-						<i class="icon-heart"></i>
-						<span>Thêm vào wishlist</span>
-					</a>
-				</figure>
-				<div class="tg-postbookcontent">
-					<div class="tg-themetagbox"><span class="tg-themetag">sale</span></div>
-					<div class="tg-booktitle">
-						<h3><NavLink to={`detail/${book.id}`} >{book.name}</NavLink></h3>
-					</div>
-					<span class="tg-stars"><span></span></span>
-					<OneBookPrice data={book.unit_price} />
-					<div className="but">
-						<a class="tg-btn tg-btnstyletwo" onClick={() => addBookToCart(book.id)} href="javascript:void(0);">
-							<div className="btn">
-								<i class="fa fa-shopping-basket"></i>
-								<em>Thêm vào giỏ hàng</em></div>
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	</>
-	));
+		</>
+		)));
+	}
 
 	return (<>
 		<div className="col-xs-12 col-sm-4 col-md-4 col-lg-3 pull-left">
 			<aside id="tg-sidebar" className="tg-sidebar">
-				<div className="tg-widget tg-widgetsearch">
-					<form className="tg-formtheme tg-formsearch">
-						<div className="form-group">
-							<button type="submit"><i className="icon-magnifier"></i></button>
-							<input type="search" name="search" className="form-group" placeholder="Search by title, author, key..." />
-						</div>
-					</form>
-				</div>
 				<div className="tg-widget tg-catagories">
 					<div className="tg-widgettitle">
 						<h3>Thể loại</h3>
 					</div>
 					<div className="tg-widgetcontent">
 						<ul>
-							<li onClick={() => handleBookClick()}>
-								<a>
+							<li>
+								<a href="javascript:void(0);" onClick={() => handleCategoryClick()}>
 									<span>Tất cả thể loại</span>
 									<em></em>
 								</a>
@@ -328,7 +326,7 @@ export default function SidebarCategories(props) {
 						</ul>
 					</div>
 				</div>
-				<div className="tg-widget tg-widgettrending">
+				{/* <div className="tg-widget tg-widgettrending">
 					<div className="tg-widgettitle">
 						<h3>Loại sách</h3>
 					</div>
@@ -336,28 +334,27 @@ export default function SidebarCategories(props) {
 						<ul>
 							<li>
 								<div className="price">
-									<input type="checkbox" ></input>
+									<input type="checkbox" onClick={() => bookTypeClickHandler(0)}></input>
 									<a>Sách in</a>
 								</div>
 							</li>
 							<li>
 								<div className="price">
-									<input type="checkbox" ></input>
+									<input type="checkbox" onClick={() => bookTypeClickHandler(1)}></input>
 									<a>E-book</a>
 								</div>
 							</li>
 							<li>
 								<div className="price">
-									<input type="checkbox" onClick={() => bookTypeClickHandler()}></input>
+									<input type="checkbox" onClick={() => bookTypeClickHandler(2)}></input>
 									<a>Combo</a>
 								</div>
 							</li>
 						</ul>
 					</div>
-				</div>
+				</div> */}
 			</aside>
 		</div>
-
 		<div class="col-xs-12 col-sm-8 col-md-8 col-lg-9 pull-right">
 			<div id="tg-content" class="tg-content">
 				<div class="tg-products">
@@ -370,7 +367,7 @@ export default function SidebarCategories(props) {
 							<form class="tg-formtheme tg-formsortshoitems">
 								<fieldset>
 									<div class="form-group">
-										<label>Sort by:</label>
+										<label>Sắp xếp:</label>
 										<span class="tg-select">
 											<select onChange={(e) => handleSortChange(e.target.value)}>
 												<option value="asc">Từ A-Z</option>
@@ -380,20 +377,10 @@ export default function SidebarCategories(props) {
 											</select>
 										</span>
 									</div>
-									{/* <div class="form-group">
-										<label>show:</label>
-										<span class="tg-select">
-											<select>
-												<option>8</option>
-												<option>16</option>
-												<option>20</option>
-											</select>
-										</span>
-									</div> */}
 								</fieldset>
 							</form>
 						</div>
-						{bookItems.length > 0 ? bookItems : comboItems}
+						{filteredBooks.length > 0 ? bookItems() : "Không tìm thấy sản phẩm!"}
 
 					</div>
 					<ReactPaginate
@@ -418,5 +405,6 @@ export default function SidebarCategories(props) {
 					/>
 				</div>
 			</div>
-		</div></>)
+		</div>
+	</>);
 }
