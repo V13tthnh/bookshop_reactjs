@@ -14,7 +14,7 @@ export default function ForgotPasswordPage() {
             const response = await axios.post('http://127.0.0.1:8000/api/customer/forgot-password', { email });
             console.log(response.data);
             if(response.data.success){
-                Swal.fire({ title: "Đã gửi yêu cầu!", icon: "success" });
+                Swal.fire({ title: "Đã gửi yêu cầu đến địa chỉ email của bạn!", text:"Vui lòng kiểm tra trong hòm thư email", icon: "success" });
             }else{
                 Swal.fire({ title: response.data.msg, text: "Email người dùng không tồn tại!", icon: "error" });
             }
@@ -22,7 +22,6 @@ export default function ForgotPasswordPage() {
         } catch (error) {
             console.error(error);
             Swal.fire({ title: "Có lỗi xảy ra!", icon: "error" });
-            // Xử lý lỗi và hiển thị thông báo lỗi
         }
     }
 

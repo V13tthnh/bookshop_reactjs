@@ -38,7 +38,7 @@ export default function ContactUs(){
 								</form>
 								<div class="tg-contactdetail">
 									<div class="tg-sectionhead">
-										<h2>Đụng là chạm với chúng tôi</h2>
+										<h2>Liên hệ với chúng tôi</h2>
 									</div>
 									<ul class="tg-contactinfo">
 										<li>

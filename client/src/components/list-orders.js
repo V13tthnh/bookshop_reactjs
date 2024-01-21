@@ -10,26 +10,27 @@ import { deleteCustomer } from "../reducers/customerSlice";
 
 export default function ListOrders(props) {
     const navigation = useNavigate();
-    const input_comment = useRef();
-    var rating = 0;
     const dispatch = useDispatch();
+
     const [orderId, setOrderId] = useState(null);
     const [orders, setOrders] = useState([]);
-    const [bookId, setBookId] = useState(null);
-    const [isDelete, setIsDelete] = useState(false);
-    const [repurchase, setRepurchase] = useState(false);
-    const [comboId, setComboId] = useState(null);
-    const [ratingErrors, setRatingErrors] = useState([]);
-    const [commentErrors, setCommentErrors] = useState([]);
+    const [isDelete, setIsDelete] = useState(0);
+    const [repurchase, setRepurchase] = useState(0);
+
     const token = useSelector(state => state.auth.token);
     const customerData = useSelector(state => state.customer.customerData);
     const orderDetail = useSelector(state => state.orders.orderDetail);
+    const id = customerData?.id;
 
-  
+    const getAllOrders = () => {
+        setOrders(props?.data);
+    }
+
     useEffect(() => {
         dispatch(getOrderDetail({ orderId, token }));
+        dispatch(getOrders({ id, token }));
         setOrders(props?.data);
-    }, [orderId, token]);
+    }, [ orderId, token, isDelete, repurchase]);
 
     //Hàm hủy đơn hàng nếu trạng thái đơn là chưa xác nhận
     const cancelHandler = (id) => {
@@ -52,8 +53,8 @@ export default function ListOrders(props) {
                     },
                 }).then((res) => {
                     if (res.data.success) {
+                        setIsDelete(prevComment => prevComment + 1);
                         Swal.fire({ title: res.data.message, text: "Đơn hàng của bạn đã ở trạng thái hủy.", icon: "success" });
-                        setOrders(props?.data);
                     } else {
                         Swal.fire({ title: "Có lỗi xảy ra, vui lòng đăng nhập lại!", text: "error!", icon: "error" });
                     }
@@ -92,8 +93,8 @@ export default function ListOrders(props) {
                     },
                 }).then((res) => {
                     if (res.data.success) {
+                        setRepurchase(prevComment => prevComment + 1);
                         Swal.fire({ title: res.data.message, text: "Đơn hàng của bạn đã được mua lại thành công!", icon: "success" });
-                        setOrders(props?.data);
                     } else {
                         Swal.fire({ title: "Có lỗi xảy ra, vui lòng đăng nhập lại!", text: "error!", icon: "error" });
                     }
@@ -110,10 +111,7 @@ export default function ListOrders(props) {
             }
         });
     }
-    const getAllOrders = () => {
-        setOrders(props?.data);
-    }
-
+  
     const filterWaitOrders = () => {
         let filter = props?.data?.filter(item => item.status === 1);
         setOrders(filter);
@@ -142,16 +140,10 @@ export default function ListOrders(props) {
     const setOrderDetail = (id) => {
         setOrderId(id);
     }
-
-    
-    //Cập nhật số sao đánh giá vào biến rating
-    const ratingChanged = (newRating) => {
-        rating = newRating;
-    };
-
+  
     //Hàm render đơn hàng chưa thanh toán
     const ordersRender = () => {
-        if (orders.length > 0) {
+        if (orders?.length > 0) {
             return (<>
                 <table className="table table-bordered table-vcenter  mb-0">
                     <thead>
@@ -212,7 +204,6 @@ export default function ListOrders(props) {
                         <th className="center">Số lượng</th>
                         <th className="right">Giá</th>
                         <th className="right">Tổng</th>
-                        <th className="right">Đánh giá</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -221,16 +212,15 @@ export default function ListOrders(props) {
                             return (<>
                                 <tr>
                                     <td className="center">{index + 1}</td>
-                                    <td className="center">{<img src={`http://localhost:8000/` + item.book?.images?.[0]?.front_cover} /> || <img src={`http://localhost:8000/` + item.combo?.image} />}</td>
+                                    <td className="center">{item.book?.book_type !== undefined ? 
+                                        <img src={`http://localhost:8000/` + item.book?.images?.[0]?.front_cover} style={{width: '180px'}}/> : 
+                                        <img src={`http://localhost:8000/` + item.combo?.image} style={{width: '180px'}}/>
+                                    }</td>
                                     <td className="left">{item.book?.name || item.combo?.name}</td>
                                     <td className="left">{item.book?.book_type === 0 ? "Sách in" : item.book?.book_type === 1 ? "Ebook" : "Combo"}</td>
                                     <td className="center">{item.quantity}</td>
                                     <td className="right">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.unit_price)}</td>
                                     <td className="right">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.unit_price * item.quantity)}</td>
-                                    <td className="center">
-                                        {item.book_id !== null ? <NavLink className="btn btn-warning" to={`/product/detail/${item.book_id}`}>Đánh giá</NavLink> :
-                                            <NavLink className="btn btn-warning" to={`/combo/detail/${item.combo_id}`}>Đánh giá</NavLink>}
-                                    </td>
                                 </tr></>)
                         })
                     }
@@ -355,9 +345,6 @@ export default function ListOrders(props) {
                                             <div className="row">
                                                 <div className="col-xl-8 col-md-12">
                                                     <div className="card cart">
-                                                        <div className="card-header border-bottom">
-
-                                                        </div>
                                                         <div className="card-body">
                                                             <div className="table-responsive">
                                                                 {ordersRender()}

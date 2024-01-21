@@ -34,17 +34,17 @@ export const viewedBooksSlice = createSlice({
     },
     addComboToViewedBook: (state, action) => {
       const newItem = action.payload;
-      if (state.items.length === 0) {
-        state.items.push(action.payload);
+      if (state.items?.length === 0) {
+        state.items?.push(action.payload);
       } else {
         let check = false;
-        state.items.map((item, key) => {
-          if (state.items[key].comboId === newItem.id) {
+        state.items?.map((item, key) => {
+          if (state.items?.[key].comboId === newItem.id) {
             check = true;
           }
         })
         if (!check) {
-          state.items.push(action.payload);
+          state.items?.push(action.payload);
         }
       }
     },

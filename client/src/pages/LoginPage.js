@@ -48,8 +48,6 @@ export default function LoginPage() {
         window.location.href = loginUrl;
     }
 
-    
-
     return (<>
         <Header />
         <div id="tg-wrapper" className="tg-wrapper tg-haslayout">
