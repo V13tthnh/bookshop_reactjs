@@ -40,6 +40,7 @@ export default function ListCombo(){
             timer: 1500
         });
     }
+
     var settings = {
         dots: true,
         infinite: false,
@@ -75,6 +76,24 @@ export default function ListCombo(){
             }
         ]
     };
+
+    //Hiển thị số sao người dùng đánh giá
+    const renderStars = (value) => {
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            stars.push(
+                <span
+                    key={i}
+                    style={{
+                        color: i <= value ? 'gold' : 'grey',
+                        cursor: 'pointer',
+                        height: '90px'
+                    }}>★</span>
+            );
+        }
+        return stars;
+    };
+
     return (<><section className="tg-parallax tg-bgcalltoaction tg-haslayout" data-z-index="-100" data-appear-top-offset="600" data-parallax="scroll" data-image-src="./assets_2/images/parallax/bgparallax-06.jpg">
         <div className="tg-sectionspace tg-haslayout">
             <div className="container">
@@ -95,10 +114,6 @@ export default function ListCombo(){
                                 <div className="item" style={{ width: 200 }}>
                                     <div className="tg-postbook">
                                         <figure className="tg-featureimg">
-                                            {/* <div className="tg-bookimg">
-                                                <div className="tg-frontcover"><img style={{ height: '300px' }} src={`http://localhost:8000/` + combo?.image} alt="image description" /></div>
-                                                
-                                            </div> */}
                                             <div ><img style={{ height: '300px'}} src={`http://localhost:8000/` + combo?.image} alt="image description" /></div>
                                             <a onClick={() => addWishList(combo)} href="javascript:void(0);" className="tg-btnaddtowishlist" >
                                                 <i className="icon-heart"></i>
@@ -109,7 +124,7 @@ export default function ListCombo(){
                                             <div className="tg-booktitle">
                                                 <h3><NavLink to={`combo/detail/${combo?.id}`}>{combo?.name}</NavLink></h3>
                                             </div>
-                                            <span className="tg-stars"><span></span></span>
+                                            {renderStars(combo?.overrate)}
                                             <span className="tg-bookprice">
                                                 <ins>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(combo?.price)}</ins>
                                             </span>

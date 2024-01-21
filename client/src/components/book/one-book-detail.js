@@ -11,7 +11,7 @@ import RelatedBooks from "./related_books";
 import Review from "../review";
 import PDFView from "../pdf-view";
 import { addToWishList, addComboToWishList } from "../../reducers/wishListSlice";
-import { addBookToViewedBook } from "../../reducers/viewedBooksSlice";
+import { addBookToViewedBook, addComboToViewedBook } from "../../reducers/viewedBooksSlice";
 
 
 export default function OneBookDetail(product) {
@@ -19,8 +19,15 @@ export default function OneBookDetail(product) {
 	const dispatch = useDispatch();
 
 	//Thêm sản phẩm trong chi tiết vào danh sách đã xem
-	dispatch(addBookToViewedBook(product?.data));
-
+	useEffect(()=>{
+		if(product.data?.book_type !== undefined){
+			dispatch(addBookToViewedBook(product?.data));
+		}else{
+			dispatch(addComboToViewedBook(product?.data));
+		}
+	
+	}, [])
+	
 	// Hàm thêm sản phẩm vào wishlist 
 	const addWishList = () => {
 		if (product.data?.book_type !== undefined) {

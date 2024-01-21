@@ -19,6 +19,7 @@ import OrderDetailPage from "./pages/OrderDetailPage.js";
 import GoogleCallback from "./pages/GoogleCallback.js";
 import VnPayCallback from "./pages/VnPayCallBack.js";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.js";
+import PasswordResetPage from "./pages/PasswordResetPage.js";
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/" element={<HomePage />}></Route>
           <Route path="/login" element={<LoginPage />}></Route>
           <Route path="/forgot-password" element={<ForgotPasswordPage />}></Route>
+          <Route path="/password-reset/:token" element={<PasswordResetPage />}></Route>
           <Route path="/auth/google/callback" element={<GoogleCallback />}></Route>
           <Route path="/register" element={<RegisterPage />}></Route>
           <Route path="/product" element={<ProductPage/>}></Route>

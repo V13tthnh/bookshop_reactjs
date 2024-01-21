@@ -24,13 +24,13 @@ export default function Comment(props) {
         .then(res => { setComments(res.data.data) })
         .catch(error => console.log(error));
        }else{
-        console.log('acb');
+
         axios.get(`http://127.0.0.1:8000/api/combo/comments/${props?.id}`)
         .then(res => { setComments(res.data.data) })
         .catch(error => console.log(error));
        }
         dispatch(getCustomerData(access_token));
-    }, [commentHandler, replyHandler, props.data]);
+    }, [props?.id, commentHandler, replyHandler, props.data]);
  
     const handleComment = () => {
         const data = {

@@ -25,6 +25,9 @@ export default function Checkout() {
     const [addressErrors, setAddressErrors] = useState([]);
     const [phoneErrors, setPhoneErrors] = useState([]);
     const [formatErrors, setFormatErrors] = useState([]);
+    const [districtErrors, setDistrictErrors] = useState('');
+    const [provinceErrors, setProvinceErrors] = useState('');
+
 
     const cartItems = useSelector(state => state.cart.carts);
     const userData = useSelector(state => state.customer.customerData);
@@ -33,7 +36,7 @@ export default function Checkout() {
 
     const [dataProvince, setDataProvince] = useState([]);
     const [dataDistrict, setDataDistrict] = useState([]);
-    const [selectedProvince, setSelectedProvince] = useState(0);
+    const [selectedProvince, setSelectedProvince] = useState(null);
     const [selectedDistrict, setSelectedDistrict] = useState('');
     const [selectedValue, setSelectedValue] = useState('cod');
     const [addressError, setAddressError] = useState([]);
@@ -79,8 +82,6 @@ export default function Checkout() {
                     }
                 }).catch((error) => console.log(error));
         }
-
-
     }, [token]);
 
     const handleRadioChange = (event) => {
@@ -88,23 +89,45 @@ export default function Checkout() {
     };
 
     const handleProvinceChange = (event) => {
-        const districts = dataProvince.filter(item => item.code == event.target.value);
-        setDataDistrict(districts[0].districts);
-        setSelectedProvince(event.target.value);
-        setSelectedDistrict('');
+        if (event.target.value !== "") {
+            const districts = dataProvince.filter(item => item.code == event.target.value);
+            setDataDistrict(districts[0].districts);
+            setSelectedProvince(event.target.value);
+            setSelectedDistrict('');
+            setProvinceErrors('');
+        }else{
+            setProvinceErrors('(*) Vui lòng chọn quận/huyện hợp lệ!')
+        }
+
     };
 
     const handleDistrictChange = (event) => {
-        setSelectedDistrict(event.target.value);
+        if (event.target.value !== '') {
+            setSelectedDistrict(event.target.value);
+            setDistrictErrors('');
+        } else {
+            setDistrictErrors("(*) Vui lòng chọn quận/huyện hợp lệ!");
+        }
 
     };
     //Xử lý thanh toán
     const handleCheckOut = async () => {
+        if(input_province.current.options[selectedProvince]?.text === undefined){
+            setProvinceErrors('(*) Vui lòng chọn tỉnh thành hợp lệ!')
+            return;
+        }
+        if(input_district.current.value === ''){
+            setDistrictErrors("(*) Vui lòng chọn quận/huyện hợp lệ!");
+            return;
+        }
         //Dữ liệu thanh toán
         const jsonOrders = {
             "customer_id": userData?.id,
             "name": input_firstName.current.value + ' ' + input_lastName.current.value,
-            "address": input_address.current.value + ', ' + input_district.current.value + ', ' + input_province.current.options[selectedProvince]?.text + ', ' + input_country.current.value,
+            "address": input_address.current.value,
+            "district": input_district.current.value,
+            "province": input_province.current.options[selectedProvince]?.text,
+            "country": input_country.current.value,
             "phone": input_phone.current.value,
             "shipping_fee": 45000,
             "note": input_note.current.value,
@@ -118,6 +141,7 @@ export default function Checkout() {
             "book_total": [],
             "combo_total": []
         }
+        console.log(jsonOrders);
         //Duyệt để truyền dữ liệu từ cart lên server
         for (let i = 0; i < cartItems.length; i++) {
             if (!cartItems[i].isCombo) {
@@ -316,7 +340,7 @@ export default function Checkout() {
                                 <div className="col-md-12"><strong>Tỉnh/thành:</strong></div>
                                 <div className="col-md-12">
                                     <select className="form-control" id="province" onChange={handleProvinceChange} ref={input_province} >
-                                        <option value={null}>
+                                        <option value="" >
                                             Chọn tỉnh/thành phố
                                         </option>
                                         {dataProvince.map((province) => (
@@ -325,13 +349,15 @@ export default function Checkout() {
                                             </option>
                                         ))}
                                     </select>
+                                    <div className="text-danger msg_error_district">{provinceErrors !== '' ? provinceErrors : ''}</div>
+
                                 </div>
                             </div>
                             <div className="form-group">
                                 <div className="col-md-12"><strong>Quận/huyện:</strong></div>
                                 <div className="col-md-12">
-                                    <select className="form-control" id="district" ref={input_district} onChange={handleDistrictChange} disabled={selectedProvince === ''}>
-                                        <option value={null}>
+                                    <select className="form-control" id="district" ref={input_district} onChange={handleDistrictChange} disabled={selectedProvince === null}>
+                                        <option value="" >
                                             Chọn Quận/huyện
                                         </option>
                                         {dataDistrict.map((district) => (
@@ -340,6 +366,7 @@ export default function Checkout() {
                                             </option>
                                         ))}
                                     </select>
+                                    <div className="text-danger msg_error_district">{districtErrors !== '' ? districtErrors : ''}</div>
                                 </div>
                             </div>
                             <div className="form-group">
@@ -347,10 +374,10 @@ export default function Checkout() {
                                 <div className="col-md-12">
                                     <input type="text" className="form-control" placeholder="Ví dụ: Tên đường, số nhà, phường, xã..." ref={input_address} />
                                 </div>
-                                <div class="text-danger">{addressError !== undefined ? addressError.map(item => '(*) ' + item) : ''}</div>
+                                <div class="text-danger">{addressErrors !== undefined ? addressErrors.map(item => item) : ''}</div>
                             </div>
                             <div className="form-group">
-                                <div className="col-md-12"><strong>Ghi chú:</strong></div>
+                                <div className="col-md-12"><strong>Ghi chú (Nếu có):</strong></div>
                                 <div className="col-md-12"><textarea className="form-control" placeholder="Ghi chú cho đơn hàng" ref={input_note}></textarea></div>
                             </div>
                         </div>
